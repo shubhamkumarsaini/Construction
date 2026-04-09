@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block custom_css %}
+<style>
+    /* Hero */
+    .hero {
+        background: linear-gradient(135deg, #1e3c72, #2a5298);
+        color: white;
+        padding: 100px 20px;
+        text-align: center;
+        border-radius: 10px;
+    }
+
+    .hero h1 {
+        font-weight: 700;
+    }
+
+    .hero p {
+        font-size: 18px;
+        opacity: 0.9;
+    }
+
+    .hero .btn {
+        border-radius: 30px;
+        padding: 10px 25px;
+    }
+
+    /* Feature Cards */
+    .feature-card {
+        border-radius: 15px;
+        padding: 25px;
+        background: white;
+        transition: 0.3s;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    }
+
+    .feature-card:hover {
+        transform: translateY(-8px);
+    }
+
+    .feature-icon {
+        width: 60px;
+        height: 60px;
+        background: #eaf2ff;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: auto;
+        font-size: 24px;
+        color: #2a5298;
+    }
+
+    /* About */
+    .about-box {
+        border-radius: 15px;
+        background: #ffffff;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    /* CTA */
+    .cta {
+        background: linear-gradient(135deg, #2a5298, #1e3c72);
+        color: white;
+        border-radius: 15px;
+        padding: 40px;
+    }
+
+</style>
+{% endblock %}
+
+{% block body %}
+
+<!-- 🔥 Hero Section -->
+<div class="container mt-4">
+    <div class="hero">
+        <h1 class="display-5">🏗️ Construction Management System</h1>
+        <p class="mt-3">
+            Ret, Bajri, Transport aur Accounting ka complete smart solution
+        </p>
+
+        {% if user.is_authenticated %}
+            <a href="/dashboard/" class="btn btn-light btn-lg mt-3">
+                🚀 Go to Dashboard
+            </a>
+        {% else %}
+            <a href="/login/" class="btn btn-light btn-lg mt-3">
+                🔐 Login Now
+            </a>
+        {% endif %}
+    </div>
+</div>
+
+<!-- 🔥 Features -->
+<div class="container mt-5">
+    <div class="row text-center">
+
+        <div class="col-md-3 mb-4">
+            <div class="feature-card">
+                <div class="feature-icon mb-3">
+                    <i class="fas fa-file-invoice"></i>
+                </div>
+                <h5>Sales</h5>
+                <p>Daily sales aur invoice tracking easy banao</p>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-4">
+            <div class="feature-card">
+                <div class="feature-icon mb-3">
+                    <i class="fas fa-shopping-cart"></i>
+                </div>
+                <h5>Purchase</h5>
+                <p>Raw material aur supplier management karo</p>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-4">
+            <div class="feature-card">
+                <div class="feature-icon mb-3">
+                    <i class="fas fa-truck"></i>
+                </div>
+                <h5>Transport</h5>
+                <p>Vehicle aur delivery ka full record rakho</p>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-4">
+            <div class="feature-card">
+                <div class="feature-icon mb-3">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h5>Dashboard</h5>
+                <p>Profit, stock aur reports ek jagah dekho</p>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- 🔥 About -->
+<div class="container mt-5">
+    <div class="about-box p-4">
+        <h4>📌 About System</h4>
+        <p>
+            Ye system specially construction business ke liye design kiya gaya hai jisme aap 
+            apni purchase, sales, transport aur accounting ko ek hi platform par manage kar sakte ho.
+        </p>
+    </div>
+</div>
+
+<!-- 🔥 CTA -->
+<div class="container mt-5 mb-5">
+    <div class="cta text-center">
+        <h3>🚀 Start Managing Your Business Today</h3>
+
+        {% if user.is_authenticated %}
+            <a href="/dashboard/" class="btn btn-light btn-lg mt-3">
+                Go to Dashboard
+            </a>
+        {% else %}
+            <a href="/login/" class="btn btn-light btn-lg mt-3">
+                Login Now
+            </a>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}
+
+{% block custom_js %}
+{% endblock %}
+
+

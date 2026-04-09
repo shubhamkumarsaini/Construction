@@ -1,0 +1,264 @@
+{% extends "base2.html" %}
+
+{% block title %}Add Sale{% endblock %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="mb-0">💰 Add Sale</h3>
+
+    <a href="{% url 'sale_list' %}" class="btn btn-secondary">
+        ⬅ Back
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card p-4">
+
+            <!-- 🔥 Messages -->
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <form method="POST">
+                {% csrf_token %}
+
+                <div class="row">
+
+                    <div class="col-md-6 mb-3">
+                        <label>Party</label>
+                        {{ form.party }}
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label>Product</label>
+                        {{ form.product }}
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label>Quantity (Qtl)</label>
+                        {{ form.quantity }}
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label>Rate</label>
+                        {{ form.rate }}
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label>GST %</label>
+                        {{ form.gst_percent }}
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label>Transport Type</label>
+                        {{ form.transport_type }}
+                    </div>
+
+                    <div class="col-md-6 mb-3" id="transport-charge-field">
+                        <label>Transport Charge</label>
+                        {{ form.transport_charge }}
+                    </div>
+
+                    <!-- 🔥 NEW FIELDS -->
+                    <div class="col-md-6 mb-3">
+                        <label>Vehicle Number</label>
+                        {{ form.vehicle_number }}
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label>Site Address</label>
+                        {{ form.site_address }}
+                    </div>
+
+                </div>
+
+                <!-- 🔥 LIVE PREVIEW -->
+                <div class="card p-3 mt-3 bg-light">
+                    <h5>💡 Live Calculation</h5>
+                    <p>Subtotal: ₹ <span id="subtotal">0</span></p>
+                    <p>GST: ₹ <span id="gst">0</span></p>
+                    <p>Transport: ₹ <span id="transport">0</span></p>
+                    <h5>Total: ₹ <span id="total">0</span></h5>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 mt-3">
+                    💾 Save Sale
+                </button>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block custom_js %}
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    let qty = document.getElementById("id_quantity");
+    let rate = document.getElementById("id_rate");
+    let gst = document.getElementById("id_gst_percent");
+    let transportType = document.getElementById("id_transport_type");
+    let transportCharge = document.getElementById("id_transport_charge");
+
+    let chargeField = document.getElementById("transport-charge-field");
+
+    function toggleTransportField() {
+        if (transportType.value === "customer") {
+            chargeField.style.display = "block";
+        } else {
+            chargeField.style.display = "none";
+        }
+    }
+
+    function calculate() {
+        let q = parseFloat(qty.value) || 0;
+        let r = parseFloat(rate.value) || 0;
+        let g = parseFloat(gst.value) || 0;
+        let t = parseFloat(transportCharge.value) || 0;
+
+        let subtotal = q * r;
+        let gstAmount = subtotal * g / 100;
+
+        let total = subtotal + gstAmount;
+
+        if (transportType.value === "customer") {
+            total += t;
+        }
+
+        document.getElementById("subtotal").innerText = subtotal.toFixed(2);
+        document.getElementById("gst").innerText = gstAmount.toFixed(2);
+        document.getElementById("transport").innerText =
+            transportType.value === "customer" ? t : 0;
+        document.getElementById("total").innerText = total.toFixed(2);
+    }
+
+    // 🔥 Events
+    [qty, rate, gst, transportCharge].forEach(el => {
+        el.addEventListener("input", calculate);
+    });
+
+    transportType.addEventListener("change", function () {
+        toggleTransportField();
+        calculate();
+    });
+
+    // 🔥 init
+    toggleTransportField();
+    calculate();
+});
+</script>
+
+{% endblock %}
+
+
+{% comment %} {% extends "base2.html" %}
+
+{% block title %}Add Sale{% endblock %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    
+    <h3 class="mb-0">💰 Add Sale</h3>
+
+    <a href="/sales/list/" class="btn btn-secondary">
+        ⬅ Back
+    </a>
+
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card p-4">
+          
+            <form method="POST">
+                {% csrf_token %}
+
+                <div class="row">
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Party</label>
+                        {{ form.party }}
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Product</label>
+                        {{ form.product }}
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Quantity (Qtl)</label>
+                        {{ form.quantity }}
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Rate</label>
+                        {{ form.rate }}
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">GST %</label>
+                        {{ form.gst_percent }}
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Transport Type</label>
+                        {{ form.transport_type }}
+                    </div>
+
+                    <div class="col-md-6 mb-3" id="transport-charge-field">
+                        <label class="form-label">Transport Charge</label>
+                        {{ form.transport_charge }}
+                    </div>
+
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100">
+                    💾 Save Sale
+                </button>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block custom_js %}
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    let transportType = document.getElementById("id_transport_type");
+    let chargeField = document.getElementById("transport-charge-field");
+
+    function toggleTransportField() {
+
+        // 🔥 Show only for CUSTOMER
+        if (transportType.value === "customer") {
+            chargeField.style.display = "block";
+        } else {
+            chargeField.style.display = "none";
+        }
+    }
+
+    // 🔥 on page load
+    toggleTransportField();
+
+    // 🔥 on change
+    transportType.addEventListener("change", toggleTransportField);
+});
+</script>
+
+{% endblock %} {% endcomment %}

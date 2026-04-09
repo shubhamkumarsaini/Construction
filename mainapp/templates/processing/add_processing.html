@@ -1,0 +1,65 @@
+{% extends "base2.html" %}
+
+{% block title %}Add Processing{% endblock %}
+
+{% block content %}
+
+<!-- 🔥 Heading + Back Button -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    
+    <h3 class="mb-0">⚙️ Add Processing</h3>
+
+    <a href="/processing/list/" class="btn btn-secondary">
+        <i class="fas fa-arrow-left me-1"></i> Back
+    </a>
+
+</div>
+
+<!-- 🔥 Messages -->
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            {{ message }}
+        </div>
+    {% endfor %}
+{% endif %}
+
+<!-- 🔥 Form Card -->
+<div class="row">
+    <div class="col-md-12">
+        <div class="card p-4">
+
+            <form method="POST">
+                {% csrf_token %}
+
+                <div class="mb-3">
+                    <label class="form-label">Select Purchase</label>
+                    {{ form.purchase }}
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Rait (Quintal)</label>
+                    {{ form.rait }}
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Bajri (Quintal)</label>
+                    {{ form.bajri }}
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Bajerkut (Quintal)</label>
+                    {{ form.bajerkut }}
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                    Save
+                </button>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}

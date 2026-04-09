@@ -1,0 +1,72 @@
+{% extends "base2.html" %}
+
+{% block title %}Party List{% endblock %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    
+    <h3>📋 Party List</h3>
+
+    <div>
+        {% comment %} <a href="/transaction/add/" class="btn btn-warning me-2">
+            💰 Add Payment
+        </a> {% endcomment %}
+
+        <a href="/party/add/" class="btn btn-success">
+            ➕ Add Party
+        </a>
+    </div>
+
+</div>
+
+<div class="card p-3">
+
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            
+            <thead class="table-dark">
+                <tr>
+                    <th>Name</th>
+                    <th>Phone</th>
+                    <th>Address</th>
+                    <th>Balance</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for p in parties %}
+                <tr>
+                    <td>{{ p.name }}</td>
+                    <td>{{ p.phone }}</td>
+                    <td>{{ p.address }}</td>
+
+                    <td>
+                        <strong class="{% if p.balance > 0 %}text-danger{% else %}text-success{% endif %}">
+                            ₹ {{ p.balance }}
+                        </strong>
+                    </td>
+
+                    <td>
+                        <a href="{% url 'party_detail' p.id %}" class="btn btn-primary btn-sm">
+                            📒 Ledger
+                        </a>
+                    </td>
+                    
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center text-muted py-4">
+                        🚫 No Party Found
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+
+        </table>
+    </div>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{% endblock %}</title>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <style>
+        /* Full height layout */
+        html, body {
+            height: 100%;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 🔥 Fixed Navbar */
+        .navbar {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        /* 🔥 Main Content (Flexible) */
+        .main-content {
+            flex: 1;
+            padding-top: 20px;
+        }
+
+        /* Cards */
+        .card {
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            transition: 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        /* 🔥 Footer Fix */
+        footer {
+            background: #212529;
+        }
+
+    </style>
+
+    {% block custom_css %}{% endblock %}
+</head>
+
+<body>
+
+<!-- 🔥 Navbar (Fixed Top) -->
+<nav class="navbar navbar-dark bg-dark px-3 fixed-top">
+    <a class="navbar-brand" href="#">🏗️ CMS</a>
+
+    <div>
+        {% if user.is_authenticated %}
+            <a href="/dashboard/" class="btn btn-success">Dashboard</a>
+            <a href="{% url 'logout' %}" class="btn btn-danger">Logout</a>
+        {% else %}
+            <a href="/signup/" class="btn btn-light">Signup</a>
+            <a href="/signup/login/" class="btn btn-light">Login</a>
+        {% endif %}
+    </div>
+</nav>
+
+
+{% block body %}
+{% endblock %}
+
+<!-- 🔻 Footer (Always Bottom) -->
+<footer class="text-white text-center p-3">
+    © 2026 Construction System | All Rights Reserved
+</footer>
+
+{% block custom_js %}{% endblock %}
+
+</body>
+</html>
+

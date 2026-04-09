@@ -1,0 +1,91 @@
+{% extends "base2.html" %}
+
+{% block title %}Ledger{% endblock %}
+
+{% block content %}
+
+<!-- Header -->
+<div class="d-flex justify-content-between mb-4">
+    <h3>📊 Ledger - {{ party.name }}</h3>
+
+    <a href="/party/list/" class="btn btn-secondary">
+        ⬅ Back
+    </a>
+</div>
+
+<!-- Summary Cards -->
+<div class="row mb-4">
+
+    <div class="col-md-4">
+        <div class="card p-3 text-center bg-success text-white">
+            <h6>Total Credit</h6>
+            <h4>₹ {{ total_credit }}</h4>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card p-3 text-center bg-danger text-white">
+            <h6>Total Debit</h6>
+            <h4>₹ {{ total_debit }}</h4>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card p-3 text-center bg-dark text-white">
+            <h6>Balance</h6>
+            <h4>₹ {{ party.balance }}</h4>
+        </div>
+    </div>
+
+</div>
+
+<!-- Table -->
+<div class="card p-3">
+
+    <div class="table-responsive">
+        <table class="table table-hover">
+
+            <thead class="table-dark">
+                <tr>
+                    <th>Date</th>
+                    <th>Description</th>
+                    <th>Credit</th>
+                    <th>Debit</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {% for t in transactions %}
+                <tr>
+                    <td>{{ t.date }}</td>
+                    <td>{{ t.description }}</td>
+
+                    <td>
+                        {% if t.type == 'credit' %}
+                            ₹ {{ t.amount }}
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {% if t.type == 'debit' %}
+                            ₹ {{ t.amount }}
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center text-muted">
+                        No Transactions Found
+                    </td>
+                </tr>
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+    </div>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,49 @@
+{% extends "base2.html" %}
+
+{% block title %}Stock{% endblock %}
+
+{% block content %}
+
+<h3 class="mb-4">📦 Current Stock</h3>
+
+<div class="row">
+
+    <!-- 🔵 Rait -->
+    <div class="col-md-4 mb-3">
+        <div class="card p-4 text-center shadow-sm">
+            <h5 class="text-muted">Rait</h5>
+            <h2 class="fw-bold">🟡 {{ stock.rait }} Qtl</h2>
+
+            {% if stock.rait < 50 %}
+                <p class="text-danger mt-2">⚠️ Low Stock</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- 🔵 Bajri -->
+    <div class="col-md-4 mb-3">
+        <div class="card p-4 text-center shadow-sm">
+            <h5 class="text-muted">Bajri</h5>
+            <h2 class="fw-bold">⚪ {{ stock.bajri }} Qtl</h2>
+
+            {% if stock.bajri < 50 %}
+                <p class="text-danger mt-2">⚠️ Low Stock</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- 🔵 Bajerkut -->
+    <div class="col-md-4 mb-3">
+        <div class="card p-4 text-center shadow-sm">
+            <h5 class="text-muted">Bajerkut</h5>
+            <h2 class="fw-bold">🟤 {{ stock.bajerkut }} Qtl</h2>
+
+            {% if stock.bajerkut < 50 %}
+                <p class="text-danger mt-2">⚠️ Low Stock</p>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,281 @@
+{% extends "base2.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+
+<h3 class="mb-4">📊 Dashboard</h3>
+
+<!-- 🔥 TOP CARDS -->
+<div class="row">
+
+    <div class="col-md-3 mb-3">
+        <div class="card p-4 text-center shadow-sm">
+            <h6>Total Sales</h6>
+            <h4 class="text-success">₹ {{ total_sales }}</h4>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-3">
+        <div class="card p-4 text-center shadow-sm">
+            <h6>Total Purchase</h6>
+            <h4 class="text-primary">₹ {{ total_purchase }}</h4>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-3">
+        <div class="card p-4 text-center shadow-sm">
+            <h6>Profit</h6>
+            <h4>₹ {{ profit }}</h4>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-3">
+        <div class="card p-4 text-center shadow-sm">
+            <h6>Received Cash</h6>
+            <h4 class="text-success">₹ {{ total_received }}</h4>
+        </div>
+    </div>
+
+</div>
+
+<!-- 🔥 SECOND ROW -->
+<div class="row">
+
+    <div class="col-md-4 mb-3">
+        <div class="card p-4 text-center shadow-sm">
+            <h6>Pending</h6>
+            <h4 class="text-danger">₹ {{ total_pending }}</h4>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-3">
+        <div class="card p-4 text-center shadow-sm">
+            <h6>Today's Sale</h6>
+            <h4 class="text-success">₹ {{ today_sales }}</h4>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-3">
+        <div class="card p-4 text-center shadow-sm">
+            <h6>Today's Purchase</h6>
+            <h4 class="text-primary">₹ {{ today_purchase }}</h4>
+        </div>
+    </div>
+
+</div>
+
+<!-- 🔥 ALERT -->
+<div class="row">
+
+    <div class="col-md-6 mb-3">
+        <div class="card p-3 shadow-sm">
+            <h5>⚠️ Low Stock</h5>
+            <ul>
+                {% for item in low_stock %}
+                <li>{{ item.0|title }} - {{ item.1 }} Qtl</li>
+                {% empty %}
+                <li class="text-success">All stock OK ✅</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <div class="col-md-6 mb-3">
+        <div class="card p-3 shadow-sm">
+            <h5>💰 Pending Parties</h5>
+            <ul>
+                {% for p in parties %}
+                <li>{{ p.name }} - ₹ {{ p.balance }}</li>
+                {% empty %}
+                <li>No pending</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+</div>
+
+<!-- 🔥 CHARTS -->
+<div class="row mt-4">
+
+    <div class="col-md-6 mb-3">
+        <div class="card p-3 shadow-sm">
+            <h5>📈 Monthly Sales</h5>
+            <canvas id="salesChart"></canvas>
+        </div>
+    </div>
+
+    <div class="col-md-6 mb-3">
+        <div class="card p-3 shadow-sm">
+            <h5>📊 Profit Overview</h5>
+            <canvas id="profitChart"></canvas>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block custom_js %}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+
+new Chart(document.getElementById('salesChart'), {
+    type: 'line',
+    data: {
+        labels: {{ sales_labels|safe }},
+        datasets: [{
+            label: 'Sales',
+            data: {{ sales_data|safe }}
+        }]
+    }
+});
+
+new Chart(document.getElementById('profitChart'), {
+    type: 'bar',
+    data: {
+        labels: {{ sales_labels|safe }},
+        datasets: [
+            {
+                label: 'Purchase',
+                data: {{ purchase_data|safe }}
+            },
+            {
+                label: 'Profit',
+                data: {{ profit_data|safe }}
+            }
+        ]
+    }
+});
+
+</script>
+
+{% endblock %}
+
+
+
+{% comment %} {% extends "base2.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+
+    <!-- LEFT SIDE -->
+    <h3 class="mb-0">📊 Dashboard</h3>
+
+    <!-- RIGHT SIDE -->
+    <div class="card p-3 text-center shadow-sm" style="min-width: 250px;">
+        <h6 class="mb-1">Pending Amount (Udhar)</h6>
+        <h5 class="text-danger mb-0">₹ {{ total_pending }}</h5>
+    </div>
+
+</div>
+
+<!-- 🔥 TOP CARDS -->
+<div class="row">
+
+    <div class="col-md-3 mb-3">
+        <div class="card p-4 text-center shadow-sm">
+            <h6>Total Sales</h6>
+            <h4 class="text-success">₹ {{ total_sales }}</h4>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-3">
+        <div class="card p-4 text-center shadow-sm">
+            <h6>Total Purchase</h6>
+            <h4 class="text-primary">₹ {{ total_purchase }}</h4>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-3">
+        <div class="card p-4 text-center shadow-sm">
+            <h6>Profit (Paper)</h6>
+            <h4 class="{% if profit > 0 %}text-success{% else %}text-danger{% endif %}">
+                ₹ {{ profit }}
+            </h4>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-3">
+        <div class="card p-4 text-center shadow-sm">
+            <h6>Received Cash</h6>
+            <h4 class="text-success">₹ {{ total_received }}</h4>
+        </div>
+    </div>
+
+</div>
+
+<!-- 🔥 CHARTS -->
+<div class="row mt-4">
+
+    <!-- 📈 SALES CHART -->
+    <div class="col-md-6 mb-3">
+        <div class="card p-3 shadow-sm">
+            <h5 class="mb-3">📈 Monthly Sales</h5>
+            <canvas id="salesChart"></canvas>
+        </div>
+    </div>
+
+    <!-- 📊 PURCHASE vs PROFIT -->
+    <div class="col-md-6 mb-3">
+        <div class="card p-3 shadow-sm">
+            <h5 class="mb-3">📊 Purchase vs Profit</h5>
+            <canvas id="profitChart"></canvas>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+{% block custom_js %}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+
+// 🔥 SALES CHART
+const salesChart = new Chart(document.getElementById('salesChart'), {
+    type: 'line',
+    data: {
+        labels: {{ sales_labels|safe }},
+        datasets: [{
+            label: 'Sales',
+            data: {{ sales_data|safe }},
+            borderWidth: 2,
+            tension: 0.3
+        }]
+    }
+});
+
+// 🔥 PURCHASE vs PROFIT
+const profitChart = new Chart(document.getElementById('profitChart'), {
+    type: 'bar',
+    data: {
+        labels: {{ sales_labels|safe }},
+        datasets: [
+            {
+                label: 'Purchase',
+                data: {{ purchase_data|safe }},
+                borderWidth: 1
+            },
+            {
+                label: 'Profit',
+                data: {{ profit_data|safe }},
+                borderWidth: 1
+            }
+        ]
+    }
+});
+
+</script>
+
+{% endblock %} {% endcomment %}
+
+

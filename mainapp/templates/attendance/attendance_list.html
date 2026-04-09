@@ -1,0 +1,132 @@
+{% extends "base2.html" %}
+
+{% block title %}Attendance List{% endblock %}
+
+{% block content %}
+
+<!-- 🔥 HEADER WITH SEARCH -->
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
+
+    <!-- 🔥 TITLE -->
+    <h3 class="mb-0">📅 Attendance List</h3>
+
+    <!-- 🔥 SEARCH (CENTER) -->
+    <form method="GET" class="d-flex gap-2 align-items-center">
+
+        <input type="text" name="name" value="{{ search_name|default:'' }}" 
+               class="form-control" placeholder="Employee"
+               style="width: 180px;">
+
+        <input type="date" name="date" value="{{ search_date }}" 
+               class="form-control"
+               style="width: 170px;">
+
+        <button class="btn btn-primary">Search</button>
+        <a href="/attendance/" class="btn btn-secondary">Reset</a>
+
+    </form>
+
+    <!-- 🔥 BUTTONS (RIGHT SIDE) -->
+    <div class="text-end">
+
+        <a href="/attendance/add/" class="btn btn-success mb-1">
+            ➕ Add Attendance
+        </a>
+
+        <br>
+
+        <a href="/attendance/view/" class="btn btn-info">
+            👁 View Attendance
+        </a>
+
+    </div>
+
+</div>
+
+<!-- 🔥 TABLE -->
+<div class="card p-3">
+
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>Date</th>
+                    <th>Employee</th>
+                    <th>Status</th>
+                    <th>Food</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for a in data %}
+                <tr>
+                    <td>{{ a.date }}</td>
+                    <td>{{ a.employee.name }}</td>
+
+                    <td>
+                        {% if a.status == 'present' %}
+                            <span class="badge bg-success">Present</span>
+                        {% elif a.status == 'absent' %}
+                            <span class="badge bg-danger">Absent</span>
+                        {% elif a.status == 'paid_leave' %}
+                            <span class="badge bg-warning text-dark">Paid Leave</span>
+                        {% else %}
+                            <span class="badge bg-info text-dark">Weekly Off</span>
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {% if a.took_food %}
+                            <span class="badge bg-primary">Yes</span>
+                        {% else %}
+                            <span class="badge bg-secondary">No</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center">No Attendance Found</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 🔥 PAGINATION -->
+    <div class="d-flex justify-content-between align-items-center mt-3">
+
+        <div>
+            Showing {{ data.start_index }} - {{ data.end_index }} of {{ data.paginator.count }}
+        </div>
+
+        <ul class="pagination mb-0">
+
+            {% if data.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ data.previous_page_number }}&name={{ search_name }}&date={{ search_date }}">Previous</a>
+            </li>
+            {% endif %}
+
+            {% for i in data.paginator.page_range %}
+                {% if data.number == i %}
+                    <li class="page-item active"><span class="page-link">{{ i }}</span></li>
+                {% else %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ i }}&name={{ search_name }}&date={{ search_date }}">{{ i }}</a>
+                    </li>
+                {% endif %}
+            {% endfor %}
+
+            {% if data.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ data.next_page_number }}&name={{ search_name }}&date={{ search_date }}">Next</a>
+            </li>
+            {% endif %}
+
+        </ul>
+
+    </div>
+
+</div>
+
+{% endblock %}

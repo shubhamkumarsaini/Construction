@@ -1,0 +1,102 @@
+{% extends "base2.html" %}
+
+{% block title %}Sales List{% endblock %}
+
+{% block content %}
+
+<!-- 🔥 Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    
+    <h3 class="mb-0">💰 Sales List</h3>
+
+    <a href="/sales/add/" class="btn btn-success">
+        ➕ Add Sale
+    </a>
+
+</div>
+
+<!-- 🔥 Table Card -->
+<div class="card p-3">
+
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+
+            <thead class="table-dark">
+                <tr>
+                    <th>Date</th>
+                    <th>Party</th>
+                    <th>Product</th>
+                    <th>Qty</th>
+                    <th>Rate</th>
+                    <th>GST %</th>
+
+                    <!-- 🔥 NEW -->
+                    <th>Transport</th>
+
+                    <th>Total</th>
+                    <th class="text-center">Action</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {% for s in sales %}
+                <tr>
+                    <td>{{ s.date }}</td>
+                    <td>{{ s.party.name }}</td>
+                    <td>{{ s.product|title }}</td>
+                    <td>{{ s.quantity }}</td>
+                    <td>₹ {{ s.rate }}</td>
+                    <td>{{ s.gst_percent }}%</td>
+
+                    <!-- 🔥 TRANSPORT COLUMN -->
+                    <td>
+                        {% if s.transport_type == "customer" %}
+                            <span class="text-primary">
+                                Customer Pay (₹ {{ s.transport_charge }})
+                            </span>
+
+                        {% elif s.transport_type == "included" %}
+                            <span class="text-success">
+                                Included
+                            </span>
+
+                        {% elif s.transport_type == "free" %}
+                            <span class="text-danger">
+                                Free (You Paid)
+                            </span>
+                        {% endif %}
+                    </td>
+
+                    <td><strong>₹ {{ s.total_amount }}</strong></td>
+
+                    <td>
+                        <a href="{% url 'print_invoice' s.id %}" 
+                            class="btn btn-sm btn-primary">
+                            🧾 Invoice
+                        </a>
+
+                        <!-- 💰 Add Payment -->
+                        <a href="{% url 'add_transaction' %}?party={{ s.party.id }}&sale={{ s.id }}"
+                            class="btn btn-sm btn-success mt-1">
+                            💰 Payment
+                        </a>
+                    </td>
+                </tr>
+
+                {% empty %}
+                <tr>
+                    <td colspan="9" class="text-center text-muted py-4">
+                        🚫 No Sales Found
+                    </td>
+                </tr>
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+    </div>
+
+</div>
+
+{% endblock %}

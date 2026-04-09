@@ -1,0 +1,29 @@
+from django.urls import path
+from .views import *
+
+
+urlpatterns = [
+    path('', homepage, name='home'),
+    path('dashboard/', dashboard, name='dashboard'),
+    path('add_purchase/', add_purchase, name='add_purchase'),
+    path('purchase_list/', purchase_list, name='purchase_list'),
+    path('processing/add/', add_processing, name='add_processing'),
+    path('processing/list/', processing_list, name='processing_list'),
+    path('stock/', stock_view, name='stock'),
+    path('party/add/', add_party, name='add_party'),
+    path('party/list/', party_list, name='party_list'),
+    path('transaction/add/', add_transaction, name='add_transaction'),
+    path('transaction/list/', transaction_list, name='transaction_list'),
+    path('sales/add/', add_sale, name='add_sale'),
+    path('sales/list/', sale_list, name='sale_list'),
+    path('party/<int:pk>/', party_detail, name='party_detail'),
+    path('invoice/<int:pk>/', print_invoice, name='print_invoice'),
+    path('invoice/pdf/<int:pk>/', invoice_pdf, name='invoice_pdf'),
+    path('employee/add/', add_employee, name='add_employee'),
+    path('employee/list/', employee_list, name='employee_list'),
+    path('employee/edit/<int:pk>/', edit_employee, name='edit_employee'),
+    path('employee/delete/<int:pk>/', delete_employee, name='delete_employee'),
+    path('attendance/', attendance_list, name='attendance_list'),
+    path('attendance/add/', add_attendance, name='add_attendance'),
+    path('attendance/view/', view_attendance, name='view_attendance'),
+]

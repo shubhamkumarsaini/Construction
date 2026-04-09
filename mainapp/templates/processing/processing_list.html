@@ -1,0 +1,50 @@
+{% extends "base2.html" %}
+
+{% block title %}Processing List{% endblock %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between mb-4">
+    <h3>⚙️ Processing List</h3>
+
+    <a href="/processing/add/" class="btn btn-success">
+        ➕ Add Processing
+    </a>
+</div>
+
+<div class="card p-3">
+
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>Date</th>
+                    <th>Purchase (Qtl)</th>
+                    <th>Rait</th>
+                    <th>Bajri</th>
+                    <th>Bajerkut</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for p in data %}
+                <tr>
+                    <td>{{ p.date }}</td>
+                    <td>{{ p.purchase.weight }}</td>
+                    <td>{{ p.rait }}</td>
+                    <td>{{ p.bajri }}</td>
+                    <td>{{ p.bajerkut }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center">No Data Found</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+
+        </table>
+    </div>
+
+</div>
+
+{% endblock %}

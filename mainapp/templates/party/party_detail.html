@@ -1,0 +1,101 @@
+{% extends "base2.html" %}
+
+{% block title %}Party Ledger{% endblock %}
+
+{% block content %}
+
+<!-- 🔥 Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    
+    <div>
+        <h3 class="mb-0">📒 Party Ledger</h3>
+        <p class="text-muted mb-0">
+            {{ party.name }} | 📞 {{ party.phone }}
+        </p>
+    </div>
+
+    <a href="/party/list/" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Back
+    </a>
+
+</div>
+
+<!-- 🔥 Summary Cards -->
+<div class="row mb-4">
+
+    <div class="col-md-4">
+        <div class="card p-3 text-center">
+            <h6>Total Credit</h6>
+            <h4 class="text-danger">₹ {{ total_credit }}</h4>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card p-3 text-center">
+            <h6>Total Debit</h6>
+            <h4 class="text-success">₹ {{ total_debit }}</h4>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card p-3 text-center">
+            <h6>Balance</h6>
+            <h4 class="{% if final_balance > 0 %}text-danger{% else %}text-success{% endif %}">
+                ₹ {{ final_balance }}
+            </h4>
+        </div>
+    </div>
+
+</div>
+
+<!-- 🔥 Ledger Table -->
+<div class="card p-3">
+
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+
+            <thead class="table-dark">
+                <tr>
+                    <th>Date</th>
+                    <th>Description</th>
+                    <th>Type</th>
+                    <th>Amount</th>
+                    <th>Running Balance</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for t in ledger %}
+                <tr>
+                    <td>{{ t.date }}</td>
+                    <td>{{ t.description }}</td>
+
+                    <td>
+                        {% if t.type == 'credit' %}
+                            <span class="badge bg-danger">Udhaar</span>
+                        {% else %}
+                            <span class="badge bg-success">Payment</span>
+                        {% endif %}
+                    </td>
+
+                    <td>₹ {{ t.amount }}</td>
+
+                    <td>
+                        <strong>₹ {{ t.balance }}</strong>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center text-muted py-4">
+                        🚫 No Transactions Found
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+
+        </table>
+    </div>
+
+</div>
+
+{% endblock %}

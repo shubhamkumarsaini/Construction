@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block title %}
+Signup
+{% endblock %}
+
+{% block custom_css %}
+<style>
+    html, body {
+        height: 100%;
+        margin: 0;
+    }
+
+    .center-box {
+        min-height: calc(100vh - 120px); /* navbar + footer adjust */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .signup-card {
+        border-radius: 15px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    }
+
+    .form-label {
+        font-weight: 500;
+    }
+
+    .eye-icon {
+        position: absolute;
+        top: 38px;
+        right: 15px;
+        cursor: pointer;
+        color: #888;
+    }
+
+    .eye-icon:hover {
+        color: #000;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+
+<div class="center-box">
+    <div class="container" style="max-width: 700px;">
+        <div class="card signup-card p-4">
+            <h3 class="text-center mb-4">🚀 Create Account</h3>
+
+            <form method="POST">
+                {% csrf_token %}
+
+                <div class="row">
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Email</label>
+                        {{ form.email }}
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Full Name</label>
+                        {{ form.full_name }}
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Phone</label>
+                        {{ form.phone }}
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">City</label>
+                        {{ form.city }}
+                    </div>
+
+                    <div class="col-md-6 mb-3 position-relative">
+                        <label class="form-label">Password</label>
+                        {{ form.password }}
+                        <span class="eye-icon" onclick="togglePassword('id_password', this)">
+                            <i class="fa fa-eye"></i>
+                        </span>
+                    </div>
+
+                    <div class="col-md-6 mb-3 position-relative">
+                        <label class="form-label">Confirm Password</label>
+                        {{ form.confirm_password }}
+                        <span class="eye-icon" onclick="togglePassword('id_confirm_password', this)">
+                            <i class="fa fa-eye"></i>
+                        </span>
+                    </div>
+
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 mt-3">
+                    Signup
+                </button>
+            </form>
+
+            <p class="text-center mt-3">
+                Already have an account? <a href="{% url 'login' %}">Login</a>
+            </p>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block custom_js %}
+<script>
+function togglePassword(fieldId, icon) {
+    const input = document.getElementById(fieldId);
+    const i = icon.querySelector("i");
+
+    if (input.type === "password") {
+        input.type = "text";
+        i.classList.remove("fa-eye");
+        i.classList.add("fa-eye-slash");
+    } else {
+        input.type = "password";
+        i.classList.remove("fa-eye-slash");
+        i.classList.add("fa-eye");
+    }
+}
+</script>
+{% endblock %}

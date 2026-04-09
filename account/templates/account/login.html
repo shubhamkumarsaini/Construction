@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block title %}
+Login
+{% endblock %}
+
+{% block custom_css %}
+<style>
+    .login-card {
+        border-radius: 15px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    }
+
+    .form-label {
+        font-weight: 500;
+    }
+
+    .eye-icon {
+        position: absolute;
+        top: 38px;
+        right: 15px;
+        cursor: pointer;
+        color: #888;
+    }
+
+    .eye-icon:hover {
+        color: #000;
+    }
+
+    .center-box {
+        min-height: calc(100vh - 120px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+
+<div class="center-box">
+    <div class="container" style="max-width: 450px;">
+        <div class="card login-card p-4">
+
+            <h3 class="text-center mb-4">🔐 Login</h3>
+
+            <form method="POST">
+                {% csrf_token %}
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {% for error in form.non_field_errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <!-- Email -->
+                <div class="mb-3">
+                    <label class="form-label">Email</label>
+                    <input type="email" name="email" class="form-control" required>
+                </div>
+
+                <!-- Password -->
+                <div class="mb-3 position-relative">
+                    <label class="form-label">Password</label>
+                    <input type="password" name="password" id="login_password" class="form-control" required>
+
+                    <span class="eye-icon" onclick="togglePassword('login_password', this)">
+                        <i class="fa fa-eye"></i>
+                    </span>
+                </div>
+
+                <!-- Remember + Forgot -->
+                <div class="d-flex justify-content-between mb-3">
+                    <div>
+                        <input type="checkbox"> Remember me
+                    </div>
+                    <a href="{% url 'password_reset' %}">Forgot Password?</a>
+                </div>
+
+                <!-- Button -->
+                <button type="submit" class="btn btn-primary w-100">
+                    Login
+                </button>
+            </form>
+
+            <!-- Signup link -->
+            <p class="text-center mt-3">
+                Don't have an account? <a href="/signup/">Signup</a>
+            </p>
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block custom_js %}
+<script>
+function togglePassword(fieldId, icon) {
+    const input = document.getElementById(fieldId);
+    const i = icon.querySelector("i");
+
+    if (input.type === "password") {
+        input.type = "text";
+        i.classList.remove("fa-eye");
+        i.classList.add("fa-eye-slash");
+    } else {
+        input.type = "password";
+        i.classList.remove("fa-eye-slash");
+        i.classList.add("fa-eye");
+    }
+}
+</script>
+{% endblock %}
