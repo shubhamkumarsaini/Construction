@@ -26,4 +26,11 @@ urlpatterns = [
     path('attendance/', attendance_list, name='attendance_list'),
     path('attendance/add/', add_attendance, name='add_attendance'),
     path('attendance/view/', view_attendance, name='view_attendance'),
+    path('employee/toggle/<int:id>/', toggle_employee, name='employee_toggle'),
+    path('salary/list/', salary_list, name='salary_list'),
+    path('salary/toggle-status/<int:id>/', toggle_salary_status, name='toggle_salary_status'),
+    path('salary/generate/', generate_salary, name='salary_generate'),
+    path('salary/view/', view_salary, name='view_salary'),
+    path('labour-payment/add/<int:emp_id>/', add_labour_payment, name='add_labour_payment'),
+    path('kitchen-expense/', kitchen_expense, name='kitchen_expense'),
 ]

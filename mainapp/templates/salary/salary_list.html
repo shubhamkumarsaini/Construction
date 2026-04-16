@@ -1,0 +1,218 @@
+{% extends "base.html" %}
+{% load custom_tags %}
+
+{% block title %}Salary List{% endblock %}
+
+{% block custom_css %}
+<style>
+.table-responsive { overflow-x: auto; }
+
+.main-content {
+    flex: 1;
+    padding-top: 70px;
+}
+
+thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+
+td:first-child, th:first-child {
+    position: sticky;
+    left: 0;
+    background: white;
+    z-index: 1;
+}
+
+thead th:first-child {
+    z-index: 3;
+    background: #212529;
+    color: white;
+}
+</style>
+{% endblock %}
+
+{% block body %}
+
+<div class="main-content">
+<div class="container-fluid">
+
+    <!-- 🔥 HEADER -->
+    <div class="d-flex align-items-center mb-3 flex-wrap">
+
+        <!-- LEFT -->
+        <div>
+            <h3>💰 Salary List</h3>
+        </div>
+
+        <!-- CENTER -->
+        <div class="mx-auto d-flex gap-2">
+
+            <form method="GET" class="d-flex gap-2">
+
+                <select name="month" class="form-control" style="width:140px;">
+                    {% for m in month_names %}
+                        <option value="{{ forloop.counter }}"
+                        {% if month == forloop.counter %}selected{% endif %}>
+                            {{ m }}
+                        </option>
+                    {% endfor %}
+                </select>
+
+                <input type="number" name="year" value="{{ year }}" 
+                    class="form-control" style="width:100px;">
+
+                <button class="btn btn-primary">Go</button>
+
+            </form>
+
+            <a href="/salary/list/" class="btn btn-secondary">
+                Reset
+            </a>
+
+        </div>
+
+        <!-- RIGHT -->
+        <div class="ms-auto d-flex gap-2">
+
+            <a href="/salary/generate/?month={{ month }}&year={{ year }}" 
+            class="btn btn-success">
+                ⚡ Generate Salary
+            </a>
+
+            <a href="/salary/view/?month={{ month }}&year={{ year }}" 
+            class="btn btn-info">
+                👁 View Salary
+            </a>
+
+        </div>
+
+    </div>
+
+    <!-- 🔥 TABLE -->
+    <div class="card p-3">
+
+        <div class="table-responsive">
+
+            <table class="table table-bordered table-sm text-center">
+
+                <thead class="table-dark">
+                    <tr>
+                        <th>Employee</th>
+                        <th>Type</th>
+                        <th>💰 Base</th>
+                        <th>✔ Present</th>
+                        <th>⏱ OT</th>
+                        <th>💵 Salary</th>
+                        <th>🍛 Food</th>
+                        <th>💰 Final Salary</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for emp in employees %}
+                    {% with s=salary_dict|get_item:emp.id %}
+
+                    <tr>
+
+                        <!-- Employee -->
+                        <td class="text-start fw-bold">
+                            {{ emp.name }} ({{ emp.employee_type }})
+                        </td>
+
+                        <!-- Type -->
+                        <td>
+                            {% if emp.salary_type == 'monthly' %}
+                                <span class="badge bg-info">Monthly</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Daily</span>
+                            {% endif %}
+                        </td>
+
+                        <!-- Base -->
+                        <td>
+                            {% if emp.salary_type == 'monthly' %}
+                                ₹ {{ emp.monthly_salary }}
+                            {% else %}
+                                ₹ {{ emp.daily_wage }} /day
+                            {% endif %}
+                        </td>
+
+                        <!-- Present -->
+                        <td>
+                            {{ s.present_days|default:"-" }}
+                        </td>
+
+                        <!-- OT -->
+                        <td>
+                            {% if emp.employee_type == 'labour' %}
+                                ₹ {{ s.overtime_amount|default:0 }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+
+                        <!-- Salary -->
+                        <td>
+                            ₹ {{ s.total_salary|default:0 }}
+                        </td>
+
+                        <!-- Food -->
+                        <td>
+                            {% if not emp.food_deduction %}
+                                <span class="badge bg-success">Free</span>
+                            {% else %}
+                                ₹ {{ s.food_deduction|default:0 }}
+                            {% endif %}
+                        </td>
+
+                        <!-- Final -->
+                        <td class="fw-bold text-success">
+                            ₹ {{ s.final_salary|default:0 }}
+                        </td>
+
+                        <!-- Status -->
+                        <td>
+                            {% if emp.salary_type == 'daily' %}
+                                <a href="/labour-payment/add/{{ emp.id }}/?month={{ month }}&year={{ year }}" 
+                                   class="btn btn-sm btn-warning">
+                                    💵 Pay
+                                </a>
+                            {% else %}
+
+                                {% if s %}
+                                    {% if s.is_paid %}
+                                        <span class="badge bg-success">Paid</span>
+                                    {% else %}
+                                        <a href="{% url 'toggle_salary_status' s.id %}" 
+                                           class="badge bg-danger text-decoration-none">
+                                            Unpaid
+                                        </a>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="badge bg-warning text-dark">Not Generated</span>
+                                {% endif %}
+
+                            {% endif %}
+                        </td>
+
+                    </tr>
+
+                    {% endwith %}
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+</div>
+
+{% endblock %}

@@ -180,7 +180,9 @@ class Employee(models.Model):
 
     daily_wage = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     monthly_salary = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-
+    food_deduction = models.BooleanField(default=True)
+    food_rate = models.DecimalField(max_digits=10, decimal_places=2, default=50)
+    overtime_rate = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     is_active = models.BooleanField(default=True)
 
     def __str__(self):
@@ -195,13 +197,16 @@ class Attendance(models.Model):
     status = models.CharField(
         max_length=20,
         choices=(
-        ('present', 'Present'),
-        ('absent', 'Absent'),
-        ('paid_leave', 'Paid Leave'),   # 🔥 new
-        ('weekly_off', 'Weekly Off'),   # 🔥 Sunday
-    ),
+            ('present', 'Present'),
+            ('absent', 'Absent'),
+            ('leave', 'Leave'),          # unpaid leave
+            ('paid_leave', 'Paid Leave'),# 🔥 add this
+            ('half', 'Half Day'),    
+            ('weekly_off', 'Weekly Off'),
+        ),
         default='present'
     )
+    overtime_hours = models.DecimalField(max_digits=5, decimal_places=2, default=0)
 
     # 🍛 Khana liya ya nahi
     took_food = models.BooleanField(default=False)
@@ -217,7 +222,8 @@ class Salary(models.Model):
     year = models.IntegerField()
 
     total_days = models.IntegerField(default=0)
-    present_days = models.IntegerField(default=0)
+    present_days = models.FloatField(default=0)  # 🔥 float (half day ke liye)
+    overtime_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
     total_salary = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
@@ -230,6 +236,34 @@ class Salary(models.Model):
     def __str__(self):
         return f"{self.employee.name}"
     
-# class Expense(models.Model):
-#     type = models.CharField(max_length=50)
-#     amount = models.DecimalField(max_digits=10, decimal_places=2)
+class DailyLabourPayment(models.Model):
+
+    employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
+
+    date = models.DateField()
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+
+    note = models.CharField(max_length=255, blank=True, null=True)
+
+    def save(self, *args, **kwargs):
+        if self.employee.employee_type != 'labour':
+            raise ValueError("Only labour payment allowed")
+        super().save(*args, **kwargs)
+
+    class Meta:
+        unique_together = ('employee', 'date')
+
+    def __str__(self):
+        return f"{self.employee.name} - {self.amount}"
+
+
+class KitchenExpense(models.Model):
+
+    date = models.DateField()
+
+    description = models.CharField(max_length=255)  # chawal, sabji, tel etc.
+
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+
+    def __str__(self):
+        return f"{self.description} - {self.amount}"

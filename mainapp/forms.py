@@ -91,7 +91,6 @@ class SaleForm(forms.ModelForm):
         }
 
 class EmployeeForm(forms.ModelForm):
-
     class Meta:
         model = Employee
         fields = '__all__'
@@ -106,20 +105,46 @@ class EmployeeForm(forms.ModelForm):
             'daily_wage': forms.NumberInput(attrs={'class': 'form-control'}),
             'monthly_salary': forms.NumberInput(attrs={'class': 'form-control'}),
 
+            'food_deduction': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'food_rate': forms.NumberInput(attrs={'class': 'form-control'}),
+
+            # 🔥 NEW FIELD
+            'overtime_rate': forms.NumberInput(attrs={'class': 'form-control'}),
+
             'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
 
-    # 🔥 YAHI LAGANA HAI
     def clean(self):
         cleaned_data = super().clean()
 
         salary_type = cleaned_data.get('salary_type')
+        daily_wage = cleaned_data.get('daily_wage')
+        monthly_salary = cleaned_data.get('monthly_salary')
+        food_deduction = cleaned_data.get('food_deduction')
+        food_rate = cleaned_data.get('food_rate')
+        overtime_rate = cleaned_data.get('overtime_rate')
 
+        # 🔥 Salary Logic
         if salary_type == 'daily':
             cleaned_data['monthly_salary'] = 0
 
+            if not daily_wage or daily_wage <= 0:
+                raise forms.ValidationError("Daily wage required")
+
         elif salary_type == 'monthly':
             cleaned_data['daily_wage'] = 0
+
+            if not monthly_salary or monthly_salary <= 0:
+                raise forms.ValidationError("Monthly salary required")
+
+        # 🔥 Food Logic
+        if food_deduction:
+            if not food_rate or food_rate <= 0:
+                raise forms.ValidationError("Food rate required")
+
+        # 🔥 Overtime Logic (NEW)
+        if overtime_rate is not None and overtime_rate < 0:
+            raise forms.ValidationError("Overtime rate cannot be negative")
 
         return cleaned_data
 
@@ -133,4 +158,20 @@ class AttendanceForm(forms.ModelForm):
             'date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
             'status': forms.Select(attrs={'class': 'form-control'}),
             'took_food': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'overtime_hours': forms.NumberInput(attrs={'class': 'form-control'}),  # 🔥 ADD
+        }
+
+class SalaryForm(forms.ModelForm):
+    class Meta:
+        model = Salary
+        fields = '__all__'
+
+        widgets = {
+            'employee': forms.Select(attrs={'class': 'form-control'}),
+            'month': forms.NumberInput(attrs={'class': 'form-control'}),
+            'year': forms.NumberInput(attrs={'class': 'form-control'}),
+            'present_days': forms.NumberInput(attrs={'class': 'form-control'}),
+            'total_salary': forms.NumberInput(attrs={'class': 'form-control'}),
+            'food_deduction': forms.NumberInput(attrs={'class': 'form-control'}),
+            'final_salary': forms.NumberInput(attrs={'class': 'form-control'}),
         }

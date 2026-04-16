@@ -29,38 +29,63 @@
             <form method="POST">
                 {% csrf_token %}
 
+                <!-- NAME -->
                 <div class="mb-3">
                     <label class="form-label">Employee Name</label>
                     {{ form.name }}
                 </div>
 
+                <!-- PHONE -->
                 <div class="mb-3">
                     <label class="form-label">Phone</label>
                     {{ form.phone }}
                 </div>
 
+                <!-- TYPE -->
                 <div class="mb-3">
                     <label class="form-label">Employee Type</label>
                     {{ form.employee_type }}
                 </div>
 
+                <!-- 🔥 OVERTIME (CONDITION BASED) -->
+                <div class="mb-3" id="overtime_field">
+                    <label class="form-label">Overtime Rate (₹ per hour)</label>
+                    {{ form.overtime_rate }}
+                </div>
+
+                <!-- SALARY TYPE -->
                 <div class="mb-3">
                     <label class="form-label">Salary Type</label>
                     {{ form.salary_type }}
                 </div>
 
-                <!-- 🔥 DAILY WAGE -->
+                <!-- DAILY -->
                 <div class="mb-3" id="daily_field">
                     <label class="form-label">Daily Wage</label>
                     {{ form.daily_wage }}
                 </div>
 
-                <!-- 🔥 MONTHLY SALARY -->
+                <!-- MONTHLY -->
                 <div class="mb-3" id="monthly_field">
                     <label class="form-label">Monthly Salary</label>
                     {{ form.monthly_salary }}
                 </div>
 
+                <!-- FOOD -->
+                <div class="form-check mb-3">
+                    {{ form.food_deduction }}
+                    <label class="form-check-label">
+                        Food Deduction (Uncheck = Free Food)
+                    </label>
+                </div>
+
+                <!-- FOOD RATE -->
+                <div class="mb-3" id="food_rate_field">
+                    <label class="form-label">Food Rate (₹ per day)</label>
+                    {{ form.food_rate }}
+                </div>
+
+                <!-- ACTIVE -->
                 <div class="form-check mb-3">
                     {{ form.is_active }}
                     <label class="form-check-label">Active</label>
@@ -79,6 +104,7 @@
 <!-- 🔥 JS -->
 <script>
 
+// 🔥 Salary toggle
 function toggleSalaryFields(){
     let type = document.getElementById("id_salary_type").value;
 
@@ -99,12 +125,40 @@ function toggleSalaryFields(){
     }
 }
 
-// 🔥 ON CHANGE
+// 🔥 Food toggle
+function toggleFoodRate(){
+    let foodCheckbox = document.getElementById("id_food_deduction");
+    let foodRateField = document.getElementById("food_rate_field");
+
+    if(foodCheckbox.checked){
+        foodRateField.style.display = "block";
+    } else {
+        foodRateField.style.display = "none";
+    }
+}
+
+// 🔥 NEW: OVERTIME TOGGLE
+function toggleOvertimeField(){
+    let empType = document.getElementById("id_employee_type").value;
+    let overtimeField = document.getElementById("overtime_field");
+
+    if(empType === "labour"){
+        overtimeField.style.display = "block";
+    } else {
+        overtimeField.style.display = "none";
+    }
+}
+
+// 🔥 EVENTS
 document.getElementById("id_salary_type").addEventListener("change", toggleSalaryFields);
+document.getElementById("id_food_deduction").addEventListener("change", toggleFoodRate);
+document.getElementById("id_employee_type").addEventListener("change", toggleOvertimeField);
 
 // 🔥 PAGE LOAD
 window.onload = function(){
     toggleSalaryFields();
+    toggleFoodRate();
+    toggleOvertimeField();   // 🔥 IMPORTANT
 };
 
 </script>

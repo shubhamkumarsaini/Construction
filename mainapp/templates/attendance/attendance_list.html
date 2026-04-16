@@ -54,24 +54,34 @@
                     <th>Employee</th>
                     <th>Status</th>
                     <th>Food</th>
+                    <th>⏱ OT</th>
                 </tr>
             </thead>
 
             <tbody>
                 {% for a in data %}
                 <tr>
-                    <td>{{ a.date }}</td>
+                    <td>{{ a.date|date:"d M Y" }}</td>
                     <td>{{ a.employee.name }}</td>
 
                     <td>
                         {% if a.status == 'present' %}
                             <span class="badge bg-success">Present</span>
+
                         {% elif a.status == 'absent' %}
                             <span class="badge bg-danger">Absent</span>
+
+                        {% elif a.status == 'leave' %}
+                            <span class="badge bg-warning text-dark">Leave</span>
+
                         {% elif a.status == 'paid_leave' %}
-                            <span class="badge bg-warning text-dark">Paid Leave</span>
+                            <span class="badge bg-info text-dark">Paid Leave</span>
+
+                        {% elif a.status == 'half' %}
+                            <span class="badge bg-secondary">Half Day</span>
+
                         {% else %}
-                            <span class="badge bg-info text-dark">Weekly Off</span>
+                            <span class="badge bg-dark">Weekly Off</span>
                         {% endif %}
                     </td>
 
@@ -80,6 +90,13 @@
                             <span class="badge bg-primary">Yes</span>
                         {% else %}
                             <span class="badge bg-secondary">No</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if a.employee.employee_type == 'labour' %}
+                            {{ a.overtime_hours }}
+                        {% else %}
+                            <span class="text-muted">-</span>
                         {% endif %}
                     </td>
                 </tr>

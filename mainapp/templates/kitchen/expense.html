@@ -1,0 +1,95 @@
+{% extends "base2.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between mb-3">
+
+        <h3>🍳 Kitchen Expense</h3>
+
+        <form method="GET" class="d-flex gap-2">
+            <input type="number" name="month" value="{{ month }}" class="form-control" placeholder="Month">
+            <input type="number" name="year" value="{{ year }}" class="form-control" placeholder="Year">
+            <button class="btn btn-primary">Filter</button>
+        </form>
+
+    </div>
+
+    <!-- ADD FORM -->
+    <div class="card p-3 mb-3">
+
+        <h5>Add Expense</h5>
+
+        <form method="POST">
+            {% csrf_token %}
+
+            <div class="row">
+
+                <div class="col-md-4">
+                    <label>Description</label>
+                    <input type="text" name="description" class="form-control" required>
+                </div>
+
+                <div class="col-md-3">
+                    <label>Amount</label>
+                    <input type="number" name="amount" step="0.01" class="form-control" required>
+                </div>
+
+                <div class="col-md-3">
+                    <label>Date</label>
+                    <input type="date" name="date" value="{{ today|date:'Y-m-d' }}" class="form-control">
+                </div>
+
+                <div class="col-md-2 d-flex align-items-end">
+                    <button class="btn btn-success w-100">Add</button>
+                </div>
+
+            </div>
+
+        </form>
+
+    </div>
+
+    <!-- LIST -->
+    <div class="card p-3">
+
+        <table class="table table-bordered text-center">
+
+            <thead class="table-dark">
+                <tr>
+                    <th>Date</th>
+                    <th>Description</th>
+                    <th>Amount ₹</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {% for e in expenses %}
+                <tr>
+                    <td>{{ e.date }}</td>
+                    <td>{{ e.description }}</td>
+                    <td class="fw-bold text-danger">₹ {{ e.amount }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3">No Expense Found</td>
+                </tr>
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+        <!-- TOTAL -->
+        <div class="text-end mt-3">
+            <h5>Total: <span class="text-danger">₹ {{ total_amount }}</span></h5>
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

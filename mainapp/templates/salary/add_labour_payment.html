@@ -1,0 +1,45 @@
+{% extends "base2.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <h3>💵 Labour Payment</h3>
+
+    <div class="card p-3">
+
+        <form method="POST">
+            {% csrf_token %}
+
+            <div class="mb-3">
+                <label>Employee</label>
+                <input type="text" class="form-control" value="{{ employee.name }}" readonly>
+            </div>
+
+            <div class="mb-3">
+                <label>Date</label>
+                <input type="date" name="date" value="{{ date }}" class="form-control">
+            </div>
+
+            <div class="mb-3">
+                <label>Amount</label>
+                <input type="number" step="0.01" name="amount" 
+                    value="{{ amount }}" 
+                    class="form-control" required>
+            </div>
+
+            <div class="mb-3">
+                <label>Note</label>
+                <input type="text" name="note" class="form-control">
+            </div>
+
+            <button class="btn btn-success">Save</button>
+            <a href="/salary/list/" class="btn btn-secondary">Back</a>
+
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}

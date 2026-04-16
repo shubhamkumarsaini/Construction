@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+{% load custom_tags %}
+
+{% block title %}Salary View{% endblock %}
+
+{% block custom_css %}
+<style>
+.table-responsive { overflow-x: auto; }
+
+.main-content {
+    flex: 1;
+    padding-top: 70px;
+}
+
+thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+
+td:first-child, th:first-child {
+    position: sticky;
+    left: 0;
+    background: white;
+    z-index: 1;
+}
+
+thead th:first-child {
+    z-index: 3;
+    background: #212529;
+    color: white;
+}
+</style>
+{% endblock %}
+
+{% block body %}
+
+<div class="main-content">
+<div class="container-fluid">
+
+    <!-- 🔥 HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
+
+        <h3>💰 Monthly Salary</h3>
+
+        <div class="d-flex gap-2">
+
+            <!-- MONTH SELECT -->
+            <form method="GET" class="d-flex gap-2">
+
+                <select name="month" class="form-control">
+                    {% for m in "123456789101112"|make_list %}
+                        <option value="{{ forloop.counter }}"
+                        {% if month == forloop.counter %}selected{% endif %}>
+                            Month {{ forloop.counter }}
+                        </option>
+                    {% endfor %}
+                </select>
+
+                <input type="number" name="year" value="{{ year }}" 
+                       class="form-control" style="width:100px;">
+
+                <button class="btn btn-primary">Go</button>
+
+            </form>
+
+            <a href="/salary/list/" class="btn btn-secondary">
+                ← Back
+            </a>
+
+        </div>
+
+    </div>
+
+    <!-- 🔥 TABLE -->
+    <div class="card p-3">
+
+        <div class="table-responsive">
+
+            <table class="table table-bordered table-sm text-center">
+
+                <thead class="table-dark">
+                    <tr>
+                        <th>Employee</th>
+                        <th>✔ Present Days</th>
+                        <th>⏱ OT Amount</th>
+                        <th>💰 Salary</th>
+                        <th>🍛 Food Deduction</th>
+                        <th>💵 Final Salary</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for emp in employees %}
+                    {% with sal=salary_dict|get_item:emp.id %}
+
+                    <tr>
+
+                        <td class="text-start fw-bold">
+                            {{ emp.name }}
+                        </td>
+
+                        <td>
+                            {{ sal.present_days|default:"-" }}
+                        </td>
+
+                        <td>
+                            ₹ {{ sal.overtime_amount|default:0 }}
+                        </td>
+
+                        <td>
+                            ₹ {{ sal.total_salary|default:0 }}
+                        </td>
+
+                        <td>
+                            ₹ {{ sal.food_deduction|default:0 }}
+                        </td>
+
+                        <td class="fw-bold text-success">
+                            ₹ {{ sal.final_salary|default:0 }}
+                        </td>
+
+                        <td>
+                            {% if sal and sal.is_paid %}
+                                <span class="badge bg-success">Paid</span>
+                            {% else %}
+                                <span class="badge bg-danger">Unpaid</span>
+                            {% endif %}
+                        </td>
+
+                    </tr>
+
+                    {% endwith %}
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+</div>
+
+{% endblock %}

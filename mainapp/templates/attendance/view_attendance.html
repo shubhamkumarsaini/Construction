@@ -89,6 +89,7 @@ thead th:first-child {
 
                         <th>✔ Present</th>
                         <th>🍛 Food</th>
+                        <th>⏱ OT</th>
                     </tr>
                 </thead>
 
@@ -106,6 +107,8 @@ thead th:first-child {
                         <!-- Days -->
                         {% for d in days %}
                             {% get_item_tuple attendance_dict emp.id d as att %}
+                            {% get_item_tuple payment_dict emp.id d as pay %}
+
                             <td>
 
                                 {% if att %}
@@ -129,6 +132,22 @@ thead th:first-child {
                                         🍛
                                     {% endif %}
 
+                                    {% if att.overtime_hours %}
+                                        <br>
+                                        <small>⏱ {{ att.overtime_hours }}</small>
+                                    {% endif %}
+
+                                    <!-- 🔥 PAYMENT STATUS (ONLY LABOUR) -->
+                                    {% if emp.employee_type == 'labour' and emp.salary_type == 'daily' %}
+                                        <br>
+
+                                        {% if pay %}
+                                            💰
+                                        {% else %}
+                                            ❌
+                                        {% endif %}
+                                    {% endif %}
+
                                 {% else %}
                                     -
                                 {% endif %}
@@ -145,6 +164,9 @@ thead th:first-child {
 
                         <td class="fw-bold text-primary">
                             {{ summary.food|default:0 }}
+                        </td>
+                        <td class="fw-bold text-black">
+                            {{ summary.ot|default:0 }}
                         </td>
                         {% endwith %}
 

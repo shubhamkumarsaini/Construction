@@ -5,54 +5,50 @@
 
 {% block content %}
 
+<form method="POST">
+{% csrf_token %}
+
 <!-- 🔥 HEADER -->
 <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap">
 
-    <!-- LEFT -->
     <h3 class="mb-0">📅 Daily Attendance</h3>
 
-    <!-- CENTER (DATE) -->
     <div class="d-flex align-items-center gap-2">
-        <label class="mb-0">Date:</label>
-        <input type="date" value="{{ selected_date|default:'' }}" 
+        <label>Date:</label>
+        <input type="date" value="{{ selected_date }}" 
                class="form-control"
-               style="width: 180px;"
+               style="width:180px;"
                onchange="changeDate(this.value)">
     </div>
 
-    <!-- RIGHT -->
-    <div class="d-flex align-items-center gap-2">
-
+    <div class="d-flex gap-2">
         <button type="button" class="btn btn-success" onclick="markAll('present')">
-            ✔ Present All
+            ✔ All Present
         </button>
 
         <button type="button" class="btn btn-danger" onclick="markAll('absent')">
-            ✖ Absent All
+            ✖ All Absent
         </button>
 
         <a href="/attendance/" class="btn btn-secondary">
             ⬅ Back
         </a>
-
     </div>
 
 </div>
-
-<!-- 🔥 FORM START -->
-<form method="POST">
-{% csrf_token %}
 
 <!-- 🔥 TABLE -->
 <div class="card p-3 shadow-sm">
 
     <div class="table-responsive">
         <table class="table table-hover align-middle">
+
             <thead class="table-dark text-center">
                 <tr>
                     <th>Employee</th>
                     <th>Status</th>
                     <th>🍛 Food</th>
+                    <th>⏱ OT (hrs)</th>
                 </tr>
             </thead>
 
@@ -71,28 +67,14 @@
                     <td>
                         <select name="status_{{ e.id }}" 
                                 class="form-control status"
-                                onchange="toggleFood(this)">
+                                onchange="toggleRow(this)">
                             
-                            <option value="present" 
-                                {% if att and att.status == 'present' %}selected{% endif %}>
-                                Present
-                            </option>
-
-                            <option value="absent" 
-                                {% if att and att.status == 'absent' %}selected{% endif %}>
-                                Absent
-                            </option>
-
-                            <option value="paid_leave" 
-                                {% if att and att.status == 'paid_leave' %}selected{% endif %}>
-                                Paid Leave
-                            </option>
-
-                            <option value="weekly_off" 
-                                {% if att and att.status == 'weekly_off' %}selected{% endif %}>
-                                Weekly Off
-                            </option>
-
+                            <option value="present" {% if att and att.status == 'present' %}selected{% endif %}>Present</option>
+                            <option value="absent" {% if att and att.status == 'absent' %}selected{% endif %}>Absent</option>
+                            <option value="leave" {% if att and att.status == 'leave' %}selected{% endif %}>Leave</option>
+                            <option value="paid_leave" {% if att and att.status == 'paid_leave' %}selected{% endif %}>Paid Leave</option>
+                            <option value="half" {% if att and att.status == 'half' %}selected{% endif %}>Half Day</option>
+                            <option value="weekly_off" {% if att and att.status == 'weekly_off' %}selected{% endif %}>Weekly Off</option>
                         </select>
                     </td>
 
@@ -104,17 +86,30 @@
                                {% if att and att.took_food %}checked{% endif %}>
                     </td>
 
+                    <!-- OT (ONLY LABOUR) -->
+                    <td>
+                        {% if e.employee_type == 'labour' %}
+                            <input type="number" step="0.5"
+                                   name="ot_{{ e.id }}"
+                                   class="form-control ot-input"
+                                   value="{% if att %}{{ att.overtime_hours }}{% else %}0{% endif %}">
+                        {% else %}
+                            <span class="text-muted">-</span>
+                        {% endif %}
+                    </td>
+
                 </tr>
                 {% endwith %}
                 {% endfor %}
             </tbody>
+
         </table>
     </div>
 
-    <!-- 🔥 IMPORTANT: hidden date -->
+    <!-- 🔥 hidden date -->
     <input type="hidden" name="date" value="{{ selected_date }}">
 
-    <!-- SAVE BUTTON -->
+    <!-- SAVE -->
     <div class="text-end mt-3">
         <button type="submit" class="btn btn-primary px-4">
             💾 Save Attendance
@@ -124,7 +119,6 @@
 </div>
 
 </form>
-<!-- 🔥 FORM END -->
 
 <!-- 🔥 JS -->
 <script>
@@ -136,31 +130,45 @@ function changeDate(date){
 
 // 🔥 MARK ALL
 function markAll(type){
-    let selects = document.querySelectorAll('.status');
-
-    selects.forEach(select => {
+    document.querySelectorAll('.status').forEach(select => {
         select.value = type;
-        toggleFood(select);
+        toggleRow(select);
     });
 }
 
-// 🔥 FOOD DISABLE LOGIC
-function toggleFood(select){
+// 🔥 MAIN LOGIC
+function toggleRow(select){
+
     let row = select.closest('tr');
     let food = row.querySelector('.food-checkbox');
+    let ot = row.querySelector('.ot-input'); // may be null
 
-    if(select.value === 'absent' || select.value === 'weekly_off'){
+    let status = select.value;
+
+    // ❌ disable cases
+    if(['absent','leave','weekly_off'].includes(status)){
         food.checked = false;
         food.disabled = true;
-    } else {
+
+        if(ot){
+            ot.value = 0;
+            ot.disabled = true;
+        }
+    }
+    else{
         food.disabled = false;
+
+        if(ot){
+            ot.disabled = false;
+        }
     }
 }
 
 // 🔥 PAGE LOAD AUTO APPLY
 window.onload = function(){
-    let selects = document.querySelectorAll('.status');
-    selects.forEach(select => toggleFood(select));
+    document.querySelectorAll('.status').forEach(select => {
+        toggleRow(select);
+    });
 }
 
 </script>

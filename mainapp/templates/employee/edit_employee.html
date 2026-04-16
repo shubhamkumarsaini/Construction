@@ -8,7 +8,7 @@
     
     <h3 class="mb-0">✏️ Edit Employee</h3>
 
-    <a href="/employee/" class="btn btn-secondary">
+    <a href="/employee/list/" class="btn btn-secondary">
         <i class="fas fa-arrow-left me-1"></i> Back
     </a>
 
@@ -29,36 +29,63 @@
             <form method="POST">
                 {% csrf_token %}
 
+                <!-- NAME -->
                 <div class="mb-3">
                     <label class="form-label">Employee Name</label>
                     {{ form.name }}
                 </div>
 
+                <!-- PHONE -->
                 <div class="mb-3">
                     <label class="form-label">Phone</label>
                     {{ form.phone }}
                 </div>
 
+                <!-- TYPE -->
                 <div class="mb-3">
                     <label class="form-label">Employee Type</label>
                     {{ form.employee_type }}
                 </div>
 
+                <!-- 🔥 OVERTIME (NEW) -->
+                <div class="mb-3" id="overtime_field">
+                    <label class="form-label">Overtime Rate (₹ per hour)</label>
+                    {{ form.overtime_rate }}
+                </div>
+
+                <!-- SALARY TYPE -->
                 <div class="mb-3">
                     <label class="form-label">Salary Type</label>
                     {{ form.salary_type }}
                 </div>
 
-                <div class="mb-3">
+                <!-- DAILY -->
+                <div class="mb-3" id="daily_field">
                     <label class="form-label">Daily Wage</label>
                     {{ form.daily_wage }}
                 </div>
 
-                <div class="mb-3">
+                <!-- MONTHLY -->
+                <div class="mb-3" id="monthly_field">
                     <label class="form-label">Monthly Salary</label>
                     {{ form.monthly_salary }}
                 </div>
 
+                <!-- FOOD -->
+                <div class="form-check mb-3">
+                    {{ form.food_deduction }}
+                    <label class="form-check-label">
+                        Food Deduction (🍛 salary se katega)
+                    </label>
+                </div>
+
+                <!-- FOOD RATE -->
+                <div class="mb-3" id="food_rate_field">
+                    <label class="form-label">Food Rate (per day)</label>
+                    {{ form.food_rate }}
+                </div>
+
+                <!-- STATUS -->
                 <div class="form-check mb-3">
                     {{ form.is_active }}
                     <label class="form-check-label">Active</label>
@@ -73,5 +100,63 @@
         </div>
     </div>
 </div>
+
+<!-- 🔥 JS -->
+<script>
+
+// 🔥 Salary toggle
+function toggleSalaryFields(){
+    let type = document.getElementById("id_salary_type").value;
+
+    let daily = document.getElementById("daily_field");
+    let monthly = document.getElementById("monthly_field");
+
+    if(type === "daily"){
+        daily.style.display = "block";
+        monthly.style.display = "none";
+    }
+    else if(type === "monthly"){
+        daily.style.display = "none";
+        monthly.style.display = "block";
+    }
+}
+
+// 🔥 Food toggle
+function toggleFoodRate(){
+    let foodCheckbox = document.getElementById("id_food_deduction");
+    let foodRateField = document.getElementById("food_rate_field");
+
+    if(foodCheckbox.checked){
+        foodRateField.style.display = "block";
+    } else {
+        foodRateField.style.display = "none";
+    }
+}
+
+// 🔥 OVERTIME TOGGLE (NEW)
+function toggleOvertimeField(){
+    let empType = document.getElementById("id_employee_type").value;
+    let overtimeField = document.getElementById("overtime_field");
+
+    if(empType === "labour"){
+        overtimeField.style.display = "block";
+    } else {
+        overtimeField.style.display = "none";
+    }
+}
+
+// 🔥 EVENTS
+document.getElementById("id_salary_type").addEventListener("change", toggleSalaryFields);
+document.getElementById("id_food_deduction").addEventListener("change", toggleFoodRate);
+document.getElementById("id_employee_type").addEventListener("change", toggleOvertimeField);
+
+// 🔥 PAGE LOAD
+window.onload = function(){
+    toggleSalaryFields();
+    toggleFoodRate();
+    toggleOvertimeField();   // 🔥 IMPORTANT
+}
+
+</script>
 
 {% endblock %}
