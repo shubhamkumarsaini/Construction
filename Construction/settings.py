@@ -28,7 +28,7 @@ DEBUG = True
 
 # ALLOWED_HOSTS = []
 ALLOWED_HOSTS = ["construction-74e5.onrender.com"]
-
+LOGIN_URL = 'login'
 # Application definition
 
 INSTALLED_APPS = [
@@ -83,6 +83,17 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'construction_db_cnfb',
+#         'USER': 'construction_db_cnfb_user',
+#         'PASSWORD': 'Mb9gYsht2tTBRzWji5RNxLAv1nj2VDos',
+#         'HOST': 'dpg-d7gd5dt8nd3s73abd3kg-a',
+#         'PORT': '5432',
+#     }
+# }
 
 
 # Password validation
