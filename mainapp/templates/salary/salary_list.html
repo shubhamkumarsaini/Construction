@@ -177,10 +177,13 @@ thead th:first-child {
                         <!-- Status -->
                         <td>
                             {% if emp.salary_type == 'daily' %}
-                                <a href="/labour-payment/add/{{ emp.id }}/?month={{ month }}&year={{ year }}" 
-                                   class="btn btn-sm btn-warning">
-                                    💵 Pay
-                                </a>
+
+                                {% if emp.id in daily_paid_ids %}
+                                    <span class="badge bg-success">Today Paid</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Today Unpaid</span>
+                                {% endif %}
+
                             {% else %}
 
                                 {% if s %}
@@ -188,7 +191,7 @@ thead th:first-child {
                                         <span class="badge bg-success">Paid</span>
                                     {% else %}
                                         <a href="{% url 'toggle_salary_status' s.id %}" 
-                                           class="badge bg-danger text-decoration-none">
+                                        class="badge bg-danger text-decoration-none">
                                             Unpaid
                                         </a>
                                     {% endif %}

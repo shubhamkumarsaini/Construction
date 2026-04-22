@@ -10,9 +10,9 @@
 
     <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <style>
-        /* Full height layout */
         html, body {
             height: 100%;
         }
@@ -21,19 +21,25 @@
             display: flex;
             flex-direction: column;
         }
+        /* 🔥 Main content ko grow karna h */
+        .main-wrapper {
+            flex: 1;
+        }
 
-        /* 🔥 Fixed Navbar */
         .navbar {
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
-        /* 🔥 Main Content (Flexible) */
-        .main-content {
-            flex: 1;
-            padding-top: 20px;
-        }
+        
 
-        /* Cards */
+        .message-container {
+            position: fixed;
+            top: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 600px;   /* control width */
+            z-index: 9999;
+        }
         .card {
             border-radius: 12px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
@@ -44,11 +50,12 @@
             transform: translateY(-5px);
         }
 
-        /* 🔥 Footer Fix */
         footer {
             background: #212529;
         }
+       
 
+        
     </style>
 
     {% block custom_css %}{% endblock %}
@@ -56,7 +63,7 @@
 
 <body>
 
-<!-- 🔥 Navbar (Fixed Top) -->
+<!-- 🔥 Navbar -->
 <nav class="navbar navbar-dark bg-dark px-3 fixed-top">
     <a class="navbar-brand" href="/">🏗️ CMS</a>
 
@@ -71,17 +78,69 @@
     </div>
 </nav>
 
+<!-- 🔥 GLOBAL MESSAGE (NEW) -->
+<div class="main-wrapper">
+    {% if messages %}
+    <div class="container message-container">
 
-{% block body %}
-{% endblock %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show auto-hide">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
 
-<!-- 🔻 Footer (Always Bottom) -->
+    </div>
+    {% endif %}
+
+    
+    {% block body %}
+    {% endblock %}
+</div>
+
 <footer class="text-white text-center p-3">
     © 2026 Construction System | All Rights Reserved
 </footer>
 
-{% block custom_js %}{% endblock %}
+{% block custom_js %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    let alerts = document.querySelectorAll('.auto-hide');
+
+    // 🔥 AUTO HIDE
+    alerts.forEach(function(alert) {
+        setTimeout(function () {
+            alert.classList.remove('show');
+            alert.classList.add('hide');
+
+            setTimeout(() => {
+                alert.remove();
+                removeContainerIfEmpty();
+            }, 500);
+        }, 3000);
+    });
+
+    // 🔥 MANUAL CLOSE FIX
+    document.querySelectorAll('.alert').forEach(function(alert) {
+        alert.addEventListener('closed.bs.alert', function () {
+            removeContainerIfEmpty();
+        });
+    });
+
+    // 🔥 FUNCTION: container empty ho to hata do
+    function removeContainerIfEmpty(){
+        let container = document.querySelector('.message-container');
+        if(container && container.children.length === 0){
+            container.remove();
+        }
+    }
+
+});
+</script>
+{% endblock %}
 
 </body>
 </html>
+
 

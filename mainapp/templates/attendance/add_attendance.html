@@ -22,17 +22,27 @@
     </div>
 
     <div class="d-flex gap-2">
-        <button type="button" class="btn btn-success" onclick="markAll('present')">
-            ✔ All Present
-        </button>
 
-        <button type="button" class="btn btn-danger" onclick="markAll('absent')">
-            ✖ All Absent
+        <!-- Weekly Off -->
+        <select class="form-control" style="width:200px;" onchange="markAll(this.value)">
+            {% comment %} <option value="">-- Select All Status --</option> {% endcomment %}
+            <option value="present">Present</option>
+            <option value="absent">Absent</option>
+            <option value="leave">Leave</option>
+            <option value="paid_leave">Paid Leave</option>
+            <option value="half">Half Day</option>
+            <option value="weekly_off">Weekly Off</option>
+        </select>
+
+        <!-- Food Toggle -->
+        <button type="button" class="btn btn-info" onclick="toggleFoodAll()">
+            🍛 Food All
         </button>
 
         <a href="/attendance/" class="btn btn-secondary">
             ⬅ Back
         </a>
+
     </div>
 
 </div>
@@ -128,6 +138,27 @@ function changeDate(date){
     window.location.href = "?date=" + date;
 }
 
+function toggleFoodAll(){
+
+    let checkboxes = document.querySelectorAll('.food-checkbox');
+
+    // check if all already checked
+    let allChecked = true;
+
+    checkboxes.forEach(cb => {
+        if(!cb.checked && !cb.disabled){
+            allChecked = false;
+        }
+    });
+
+    // toggle logic
+    checkboxes.forEach(cb => {
+        if(!cb.disabled){
+            cb.checked = !allChecked;
+        }
+    });
+}
+
 // 🔥 MARK ALL
 function markAll(type){
     document.querySelectorAll('.status').forEach(select => {
@@ -135,6 +166,7 @@ function markAll(type){
         toggleRow(select);
     });
 }
+
 
 // 🔥 MAIN LOGIC
 function toggleRow(select){

@@ -142,9 +142,14 @@ thead th:first-child {
                                         <br>
 
                                         {% if pay %}
-                                            💰
+                                            <span class="text-success fw-bold">
+                                               {{ pay.amount }}
+                                            </span>
                                         {% else %}
-                                            ❌
+                                            <a href="/labour-payment/add/{{ emp.id }}/?date={{ year }}-{{ month|stringformat:"02d" }}-{{ d|stringformat:"02d" }}"
+                                            class="btn btn-sm btn-warning">
+                                                Pay
+                                            </a>
                                         {% endif %}
                                     {% endif %}
 

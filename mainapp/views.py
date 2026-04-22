@@ -12,7 +12,7 @@ from django.http import HttpResponse
 from django.core.paginator import Paginator
 from collections import defaultdict
 import calendar
-from datetime import date
+from datetime import date,datetime
 
 # Create your views here.
 def homepage(request):
@@ -903,28 +903,34 @@ def generate_salary(request):
 
     return redirect(f'/salary/list/?month={month}&year={year}')
 
-@login_required
+@login_required 
 def salary_list(request):
 
     today = date.today()
 
     month = int(request.GET.get('month', today.month))
     year = int(request.GET.get('year', today.year))
+
     month_names = [
-        "January ", "February ", "March ", "April ", "May ", "June ",
-        "July ", "August ", "September", " October", " November ", "December"
+        "January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"
     ]
 
     employees = Employee.objects.filter(is_active=True)
 
     salary_qs = Salary.objects.filter(month=month, year=year)
-
-    # 🔥 dict (employee_id -> salary)
     salary_dict = {s.employee_id: s for s in salary_qs}
+
+    # 🔥 DAILY PAYMENT (TODAY)
+    daily_paid_ids = set(
+        DailyLabourPayment.objects.filter(date=today)
+        .values_list('employee_id', flat=True)
+    )
 
     return render(request, 'salary/salary_list.html', {
         'employees': employees,
         'salary_dict': salary_dict,
+        'daily_paid_ids': daily_paid_ids,  # 👈 NEW
         'month': month,
         'year': year,
         'month_names': month_names
@@ -988,19 +994,41 @@ def add_labour_payment(request, emp_id):
 
     employee = get_object_or_404(Employee, id=emp_id)
 
-    # ❌ safety check
     if employee.employee_type != 'labour':
         messages.error(request, "Only labour payment allowed ❌")
         return redirect('/salary/list/')
 
-    # ✅ default date (proper format)
+    # ✅ date
     payment_date = request.GET.get('date')
     if not payment_date:
         payment_date = date.today().strftime('%Y-%m-%d')
 
-    # ✅ default amount from employee
-    default_amount = employee.daily_wage
+    parsed_date = datetime.strptime(payment_date, "%Y-%m-%d").date()
 
+    # 🔥 GET ATTENDANCE
+    attendance = Attendance.objects.filter(
+        employee=employee,
+        date=parsed_date
+    ).first()
+
+    # 🔥 DEFAULT AMOUNT
+    default_amount = Decimal(employee.daily_wage)
+
+    if attendance:
+
+        # ✅ 1. OVERTIME ADD
+        if attendance.overtime_hours:
+            default_amount += Decimal(attendance.overtime_hours) * Decimal(employee.overtime_rate)
+
+        # ✅ 2. FOOD DEDUCT
+        if employee.food_deduction and attendance.took_food:
+            default_amount -= Decimal(employee.food_rate)
+
+    # ❗ negative amount avoid
+    if default_amount < 0:
+        default_amount = 0
+
+    # 🔥 SAVE
     if request.method == "POST":
         payment_date = request.POST.get('date')
         amount = request.POST.get('amount')
@@ -1016,12 +1044,12 @@ def add_labour_payment(request, emp_id):
         )
 
         messages.success(request, "Payment saved ✅")
-        return redirect('/salary/list/')
+        return redirect('/attendance/view/')
 
     return render(request, 'salary/add_labour_payment.html', {
         'employee': employee,
         'date': payment_date,
-        'amount': default_amount   # 🔥 pass default amount
+        'amount': default_amount
     })
 
 @login_required
