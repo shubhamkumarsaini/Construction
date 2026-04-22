@@ -18,107 +18,6 @@ from datetime import date,datetime
 def homepage(request):
     return render(request, 'home.html')
 
-# @login_required
-# def dashboard(request):
-#     # 🔥 TOTALS
-#     total_sales = Sale.objects.aggregate(total=Sum('total_amount'))['total'] or 0
-#     total_purchase = Purchase.objects.aggregate(total=Sum('total_amount'))['total'] or 0
-#     profit = total_sales - total_purchase
-
-#     # 🔥 RECEIVED & PENDING
-#     total_received = Transaction.objects.filter(type='debit').aggregate(total=Sum('amount'))['total'] or 0
-#     total_credit = Transaction.objects.filter(type='credit').aggregate(total=Sum('amount'))['total'] or 0
-#     total_debit = Transaction.objects.filter(type='debit').aggregate(total=Sum('amount'))['total'] or 0
-
-#     total_pending = total_credit - total_debit
-    
-
-#     # 🔥 TODAY
-#     today = date.today()
-#     today_sales = Sale.objects.filter(date=today).aggregate(total=Sum('total_amount'))['total'] or 0
-#     today_purchase = Purchase.objects.filter(date=today).aggregate(total=Sum('total_amount'))['total'] or 0
-
-#     # 🔥 STOCK
-#     total = Processing.objects.aggregate(
-#         rait=Sum('rait'),
-#         bajri=Sum('bajri'),
-#         bajerkut=Sum('bajerkut')
-#     )
-
-#     sold = Sale.objects.aggregate(
-#         rait=Sum('quantity', filter=Q(product='rait')),
-#         bajri=Sum('quantity', filter=Q(product='bajri')),
-#         bajerkut=Sum('quantity', filter=Q(product='bajerkut'))
-#     )
-
-#     stock = {
-#         'rait': (total['rait'] or 0) - (sold['rait'] or 0),
-#         'bajri': (total['bajri'] or 0) - (sold['bajri'] or 0),
-#         'bajerkut': (total['bajerkut'] or 0) - (sold['bajerkut'] or 0),
-#     }
-
-#     # 🔥 LOW STOCK ALERT (<100)
-#     low_stock = []
-#     for k, v in stock.items():
-#         if v < 100:
-#             low_stock.append((k, v))
-
-#     # 🔥 TOP PENDING PARTIES
-#     parties = Party.objects.order_by('-balance')[:5]
-
-#     # 🔥 MONTHLY SALES
-#     monthly_sales = (
-#         Sale.objects
-#         .annotate(month=TruncMonth('date'))
-#         .values('month')
-#         .annotate(total=Sum('total_amount'))
-#         .order_by('month')
-#     )
-
-#     sales_labels = []
-#     sales_data = []
-
-#     for item in monthly_sales:
-#         sales_labels.append(item['month'].strftime('%b'))
-#         sales_data.append(float(item['total']))
-
-#     # 🔥 MONTHLY PURCHASE
-#     monthly_purchase = (
-#         Purchase.objects
-#         .annotate(month=TruncMonth('date'))
-#         .values('month')
-#         .annotate(total=Sum('total_amount'))
-#         .order_by('month')
-#     )
-
-#     purchase_data = []
-#     profit_data = []
-
-#     for i in range(len(sales_data)):
-#         s = sales_data[i]
-#         p = float(monthly_purchase[i]['total']) if i < len(monthly_purchase) else 0
-
-#         purchase_data.append(p)
-#         profit_data.append(s - p)
-
-#     context = {
-#         'total_sales': total_sales,
-#         'total_purchase': total_purchase,
-#         'profit': profit,
-#         'total_received': total_received,
-#         'total_pending': total_pending,
-#         'today_sales': today_sales,
-#         'today_purchase': today_purchase,
-#         'stock': stock,
-#         'low_stock': low_stock,
-#         'parties': parties,
-#         'sales_labels': sales_labels,
-#         'sales_data': sales_data,
-#         'purchase_data': purchase_data,
-#         'profit_data': profit_data,
-#     }
-
-#     return render(request, 'dashboard.html', context)
 
 @login_required
 def dashboard(request):
@@ -167,6 +66,7 @@ def dashboard(request):
     # 🔥 ✅ FINAL PROFIT (CORRECT)
     total_expense = total_purchase + total_labour_paid + total_kitchen_expense
     profit = total_sales - total_expense
+    cash_profit = total_received - total_expense
 
     # 🔥 STOCK
     total = Processing.objects.aggregate(
@@ -239,6 +139,7 @@ def dashboard(request):
         'total_sales': total_sales,
         'total_purchase': total_purchase,
         'profit': profit,
+        'cash_profit': cash_profit, 
         'total_received': total_received,
         'total_pending': total_pending,
 

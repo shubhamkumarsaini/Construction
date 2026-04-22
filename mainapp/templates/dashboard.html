@@ -85,6 +85,18 @@
             <h4 class="text-danger">₹ {{ total_kitchen_expense }}</h4>
         </div>
     </div>
+    <div class="col-md-3 mb-3">
+        <div class="card p-4 text-center shadow-sm">
+            <h6>Cash Profit</h6>
+
+            {% if cash_profit >= 0 %}
+                <h4 class="text-success">₹ {{ cash_profit }}</h4>
+            {% else %}
+                <h4 class="text-danger">₹ {{ cash_profit }}</h4>
+            {% endif %}
+
+        </div>
+    </div>
 
 </div>
 
