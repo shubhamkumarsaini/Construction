@@ -88,6 +88,10 @@ thead th:first-child {
                         {% endfor %}
 
                         <th>✔ Present</th>
+                        <th>❌ Absent</th>
+                        <th>🌴 Leave</th>
+                        <th>💰 Paid Leave</th>
+                        <th>📅 WO</th>
                         <th>🍛 Food</th>
                         <th>⏱ OT</th>
                     </tr>
@@ -138,7 +142,7 @@ thead th:first-child {
                                     {% endif %}
 
                                     <!-- 🔥 PAYMENT STATUS (ONLY LABOUR) -->
-                                    {% if emp.employee_type == 'labour' and emp.salary_type == 'daily' %}
+                                    {% if emp.employee_type == 'labour' and emp.salary_type == 'daily' and att.status == 'present' %}
                                         <br>
 
                                         {% if pay %}
@@ -163,16 +167,34 @@ thead th:first-child {
                         <!-- 🔥 SUMMARY -->
                         {% with summary=attendance_summary|get_item:emp.id %}
 
-                        <td class="fw-bold text-success">
-                            {{ summary.present|default:0 }}
-                        </td>
+                            <td class="fw-bold text-success">
+                                {{ summary.present|default:0 }}
+                            </td>
 
-                        <td class="fw-bold text-primary">
-                            {{ summary.food|default:0 }}
-                        </td>
-                        <td class="fw-bold text-black">
-                            {{ summary.ot|default:0 }}
-                        </td>
+                            <td class="fw-bold text-danger">
+                                {{ summary.absent|default:0 }}
+                            </td>
+
+                            <td class="fw-bold text-warning">
+                                {{ summary.leave|default:0 }}
+                            </td>
+
+                            <td class="fw-bold text-info">
+                                {{ summary.paid_leave|default:0 }}
+                            </td>
+
+                            <td class="fw-bold text-secondary">
+                                {{ summary.weekly_off|default:0 }}
+                            </td>
+
+                            <td class="fw-bold text-primary">
+                                {{ summary.food|default:0 }}
+                            </td>
+
+                            <td class="fw-bold text-dark">
+                                {{ summary.ot|default:0 }}
+                            </td>
+
                         {% endwith %}
 
                     </tr>

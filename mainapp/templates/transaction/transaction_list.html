@@ -4,19 +4,41 @@
 
 {% block content %}
 
-<div class="d-flex justify-content-between mb-4">
-    <h3>📋 Transaction List</h3>
+<!-- 🔥 HEADER + FILTER -->
+<div class="d-flex justify-content-between align-items-center mb-3">
 
-    {% comment %} <a href="/transaction/add/" class="btn btn-success">
-        ➕ Add Transaction
-    </a> {% endcomment %}
+    <!-- LEFT -->
+    <h3 class="mb-0">📋 Transaction List</h3>
+
+    <!-- RIGHT FILTER -->
+    <form method="GET" class="d-flex gap-2 align-items-center">
+
+        <!-- QUICK FILTER -->
+        <select name="filter" class="form-control" style="width:140px;">
+            <option value="">All</option>
+            <option value="1" {% if filter_type == "1" %}selected{% endif %}>1 Month</option>
+            <option value="3" {% if filter_type == "3" %}selected{% endif %}>3 Months</option>
+            <option value="6" {% if filter_type == "6" %}selected{% endif %}>6 Months</option>
+            <option value="12" {% if filter_type == "12" %}selected{% endif %}>1 Year</option>
+        </select>
+
+        <!-- DATE RANGE -->
+        <input type="date" name="start_date" value="{{ start_date }}" class="form-control" style="width:150px;">
+        <input type="date" name="end_date" value="{{ end_date }}" class="form-control" style="width:150px;">
+
+        <button class="btn btn-primary">Search</button>
+        <a href="/transaction/" class="btn btn-secondary">Reset</a>
+
+    </form>
+
 </div>
 
+<!-- 🔥 TABLE -->
 <div class="card p-3">
 
     <div class="table-responsive">
         <table class="table table-hover">
-            
+
             <thead class="table-dark">
                 <tr>
                     <th>Date</th>
@@ -30,8 +52,9 @@
             <tbody>
                 {% for t in data %}
                 <tr>
-                    <td>{{ t.date }}</td>
+                    <td>{{ t.date|date:"d M Y" }}</td>
                     <td>{{ t.party.name }}</td>
+
                     <td>
                         {% if t.type == 'credit' %}
                             <span class="badge bg-danger">Credit</span>
@@ -39,6 +62,7 @@
                             <span class="badge bg-success">Debit</span>
                         {% endif %}
                     </td>
+
                     <td>₹ {{ t.amount }}</td>
                     <td>{{ t.description }}</td>
                 </tr>
@@ -50,6 +74,41 @@
             </tbody>
 
         </table>
+    </div>
+
+    <!-- 🔥 PAGINATION -->
+    <div class="d-flex justify-content-between align-items-center mt-3">
+
+        <div>
+            Showing {{ data.start_index }} - {{ data.end_index }} of {{ data.paginator.count }}
+        </div>
+
+        <ul class="pagination mb-0">
+
+            {% if data.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ data.previous_page_number }}&filter={{ filter_type }}&start_date={{ start_date }}&end_date={{ end_date }}">Previous</a>
+            </li>
+            {% endif %}
+
+            {% for i in data.paginator.page_range %}
+                {% if data.number == i %}
+                    <li class="page-item active"><span class="page-link">{{ i }}</span></li>
+                {% else %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ i }}&filter={{ filter_type }}&start_date={{ start_date }}&end_date={{ end_date }}">{{ i }}</a>
+                    </li>
+                {% endif %}
+            {% endfor %}
+
+            {% if data.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ data.next_page_number }}&filter={{ filter_type }}&start_date={{ start_date }}&end_date={{ end_date }}">Next</a>
+            </li>
+            {% endif %}
+
+        </ul>
+
     </div>
 
 </div>

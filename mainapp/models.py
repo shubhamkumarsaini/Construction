@@ -1,5 +1,6 @@
 from django.db import models
 from decimal import Decimal
+from django.core.exceptions import ValidationError
 
 class Party(models.Model):
     name = models.CharField(max_length=255)
@@ -25,7 +26,7 @@ class Transaction(models.Model):
     type = models.CharField(max_length=10, choices=TRANSACTION_TYPE)
     description = models.CharField(max_length=255, blank=True, null=True)
 
-    reference_id = models.IntegerField(blank=True, null=True)  # 🔥 link with sale
+    sale = models.ForeignKey('Sale', null=True, blank=True, on_delete=models.SET_NULL)
 
     date = models.DateField(auto_now_add=True)
 
@@ -43,6 +44,15 @@ class Transaction(models.Model):
                 self.party.balance -= self.amount
 
             self.party.save()
+
+    def delete(self, *args, **kwargs):
+        if self.type == 'credit':
+            self.party.balance -= self.amount
+        else:
+            self.party.balance += self.amount
+
+        self.party.save()
+        super().delete(*args, **kwargs)
 
 
 # Create your models here.
@@ -62,16 +72,42 @@ class Purchase(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.supplier_name} ({self.vehicle_number})"
+        return f"{self.supplier_name} | {self.vehicle_number} | {self.weight} Quintal | {self.date} | ID:{self.id}"
 
 class Processing(models.Model):
-    purchase = models.ForeignKey(Purchase, on_delete=models.CASCADE)
+    purchase = models.ForeignKey('Purchase', on_delete=models.CASCADE)
 
     rait = models.FloatField()
     bajri = models.FloatField()
     bajerkut = models.FloatField()
 
+    wastage = models.FloatField(default=0)
+
     date = models.DateField(auto_now_add=True)
+
+    def clean(self):
+        # 🔥 duplicate check
+        if Processing.objects.filter(purchase=self.purchase).exclude(pk=self.pk).exists():
+            raise ValidationError("Is purchase ka processing already ho chuka hai ❌")
+
+        total_output = (self.rait or 0) + (self.bajri or 0) + (self.bajerkut or 0)
+
+        if total_output > self.purchase.weight:
+            raise ValidationError("Total output purchase se zyada nahi ho sakta ❌")
+
+    def save(self, *args, **kwargs):
+        # 🔥 validation call
+        self.clean()
+
+        total_output = (self.rait or 0) + (self.bajri or 0) + (self.bajerkut or 0)
+
+        # 🔥 wastage auto calculate
+        self.wastage = self.purchase.weight - total_output
+
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.purchase} - Processing"
 
 class Sale(models.Model):
 
@@ -152,7 +188,7 @@ class Sale(models.Model):
                 amount=self.total_amount,
                 type='credit',
                 description=f"Invoice {self.invoice_number} - {self.product}",
-                reference_id=self.id
+                sale=self
             )
 
     def __str__(self):

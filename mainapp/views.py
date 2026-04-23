@@ -12,7 +12,7 @@ from django.http import HttpResponse
 from django.core.paginator import Paginator
 from collections import defaultdict
 import calendar
-from datetime import date,datetime
+from datetime import date,datetime, timedelta
 
 # Create your views here.
 def homepage(request):
@@ -176,47 +176,67 @@ def add_purchase(request):
 
 @login_required
 def purchase_list(request):
-    if not request.user.is_authenticated:
-        return redirect('login')
 
-    purchases = Purchase.objects.all().order_by('-id')
+    purchases = Purchase.objects.all().order_by('-date')
+
+    # 🔥 FILTERS
+    search = request.GET.get('search')
+    filter_type = request.GET.get('filter')
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+
+    today = date.today()
+
+    # 🔍 SEARCH (supplier + vehicle)
+    if search and search != "None":
+        purchases = purchases.filter(
+            Q(supplier_name__icontains=search) |
+            Q(vehicle_number__icontains=search)
+        )
+
+    # 🔥 QUICK FILTER
+    if filter_type == "1":
+        purchases = purchases.filter(date__gte=today - timedelta(days=30))
+
+    elif filter_type == "3":
+        purchases = purchases.filter(date__gte=today - timedelta(days=90))
+
+    elif filter_type == "6":
+        purchases = purchases.filter(date__gte=today - timedelta(days=180))
+
+    elif filter_type == "12":
+        purchases = purchases.filter(date__gte=today - timedelta(days=365))
+
+    # 🔥 DATE RANGE
+    if start_date and end_date:
+        purchases = purchases.filter(date__range=[start_date, end_date])
+
+    # 🔥 PAGINATION
+    paginator = Paginator(purchases, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
 
     return render(request, 'purchase/purchase_list.html', {
-        'purchases': purchases
+        'purchases': page_obj,
+        'search': search if search and search != "None" else "",
+        'filter_type': filter_type,
+        'start_date': start_date,
+        'end_date': end_date,
     })
 
 @login_required
 def add_processing(request):
-    if not request.user.is_authenticated:
-        return redirect('login')
 
     form = ProcessingForm(request.POST or None)
 
     if form.is_valid():
+        try:
+            form.save()
+            messages.success(request, "Processing saved successfully ✅")
+            return redirect('processing_list')
 
-        purchase = form.cleaned_data['purchase']
-
-        # ❌ duplicate check
-        if Processing.objects.filter(purchase=purchase).exists():
-            messages.error(request, "Is purchase ka processing already ho chuka hai ❌")
-        else:
-            processing = form.save(commit=False)
-
-            total_input = purchase.weight
-
-            total_output = (
-                processing.rait +
-                processing.bajri +
-                processing.bajerkut
-            )
-
-            # 🔥 validation
-            if total_output > total_input:
-                messages.error(request, "Total output purchase se zyada nahi ho sakta ❌")
-            else:
-                processing.save()
-                messages.success(request, "Processing saved successfully ✅")
-                return redirect('processing_list')
+        except Exception as e:
+            messages.error(request, str(e))
 
     return render(request, 'processing/add_processing.html', {
         'form': form
@@ -225,14 +245,37 @@ def add_processing(request):
 
 @login_required
 def processing_list(request):
-    if not request.user.is_authenticated:
-        return redirect('login')
 
-    data = Processing.objects.select_related('purchase').order_by('-id')
+    search = request.GET.get('search')
+    date_filter = request.GET.get('date')
+
+    data = Processing.objects.select_related('purchase').order_by('-date')
+
+    # 🔍 TEXT SEARCH
+    if search and search != "None":
+        data = data.filter(
+            Q(purchase__weight__icontains=search) |
+            Q(rait__icontains=search) |
+            Q(bajri__icontains=search) |
+            Q(bajerkut__icontains=search) |
+            Q(wastage__icontains=search)
+        )
+
+    # 📅 DATE FILTER (CORRECT WAY)
+    if date_filter:
+        data = data.filter(date=date_filter)
+
+    # 🔥 PAGINATION
+    paginator = Paginator(data, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
 
     return render(request, 'processing/processing_list.html', {
-        'data': data
+        'data': page_obj,
+        'search': search if search and search != "None" else "",
+        'date': date_filter,
     })
+
 
 @login_required
 def stock_view(request):
@@ -270,15 +313,31 @@ def add_party(request):
     })
 
 
-# 📋 List Party
 @login_required
 def party_list(request):
+
+    search = request.GET.get('search')
+
     parties = Party.objects.all().order_by('-id')
 
+    # 🔥 SEARCH (name + address)
+    if search and search != "None":
+        parties = parties.filter(
+            Q(name__icontains=search) |
+            Q(address__icontains=search)
+        )
+
+    # 🔥 PAGINATION
+    paginator = Paginator(parties, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
     return render(request, 'party/party_list.html', {
-        'parties': parties
+        'parties': page_obj,
+        'search': search if search and search != "None" else "",
     })
 
+@login_required
 def add_transaction(request):
     form = TransactionForm(request.POST or None)
 
@@ -291,11 +350,65 @@ def add_transaction(request):
     if form.is_valid():
         obj = form.save(commit=False)
 
-        if sale_id:
-            obj.reference_id = sale_id
-            obj.description = f"Payment for Invoice ID {sale_id}"
+        party = obj.party
+        amount = obj.amount
 
-        obj.save()
+        # 🔥 CASE 1: Specific Invoice Payment
+        if sale_id:
+            sale = Sale.objects.get(id=sale_id)
+
+            obj.sale = sale
+            obj.type = 'debit'
+            obj.description = f"Payment for {sale.invoice_number}"
+            obj.save()
+
+        # 🔥 CASE 2: FIFO Payment
+        else:
+            remaining = amount
+
+            sales = Sale.objects.filter(party=party).order_by('date')
+
+            for sale in sales:
+                paid = Transaction.objects.filter(
+                    sale=sale,
+                    type='debit'
+                ).aggregate(total=Sum('amount'))['total'] or 0
+
+                balance = sale.total_amount - paid
+
+                if balance <= 0:
+                    continue
+
+                if remaining >= balance:
+                    # full clear
+                    Transaction.objects.create(
+                        party=party,
+                        sale=sale,
+                        amount=balance,
+                        type='debit',
+                        description=f"Payment for {sale.invoice_number}"
+                    )
+                    remaining -= balance
+                else:
+                    # partial
+                    Transaction.objects.create(
+                        party=party,
+                        sale=sale,
+                        amount=remaining,
+                        type='debit',
+                        description=f"Partial payment for {sale.invoice_number}"
+                    )
+                    remaining = 0
+                    break
+
+            # 🔥 Extra advance
+            if remaining > 0:
+                Transaction.objects.create(
+                    party=party,
+                    amount=remaining,
+                    type='debit',
+                    description="Advance Payment"
+                )
 
         messages.success(request, "Payment saved successfully ✅")
         return redirect('party_list')
@@ -306,13 +419,43 @@ def add_transaction(request):
 
 @login_required
 def transaction_list(request):
-    if not request.user.is_authenticated:
-        return redirect('login')
 
-    data = Transaction.objects.select_related('party').order_by('-id')
+    data = Transaction.objects.select_related('party').order_by('-date')
+
+    # 🔥 FILTERS
+    filter_type = request.GET.get('filter')
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+
+    today = date.today()
+
+    # 🔥 QUICK FILTER (1,3,6,12 months)
+    if filter_type == "1":
+        data = data.filter(date__gte=today - timedelta(days=30))
+
+    elif filter_type == "3":
+        data = data.filter(date__gte=today - timedelta(days=90))
+
+    elif filter_type == "6":
+        data = data.filter(date__gte=today - timedelta(days=180))
+
+    elif filter_type == "12":
+        data = data.filter(date__gte=today - timedelta(days=365))
+
+    # 🔥 DATE RANGE FILTER
+    if start_date and end_date:
+        data = data.filter(date__range=[start_date, end_date])
+
+    # 🔥 PAGINATION
+    paginator = Paginator(data, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
 
     return render(request, 'transaction/transaction_list.html', {
-        'data': data
+        'data': page_obj,
+        'filter_type': filter_type,
+        'start_date': start_date,
+        'end_date': end_date,
     })
 
 
@@ -375,11 +518,48 @@ def party_detail(request, pk):
 
     transactions = Transaction.objects.filter(party=party).order_by('date', 'id')
 
+    # 🔥 FILTERS
+    filter_type = request.GET.get('filter')
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+
+    today = date.today()
+
+    # 🔥 QUICK FILTER
+    if filter_type == "1":
+        transactions = transactions.filter(date__gte=today - timedelta(days=30))
+
+    elif filter_type == "3":
+        transactions = transactions.filter(date__gte=today - timedelta(days=90))
+
+    elif filter_type == "6":
+        transactions = transactions.filter(date__gte=today - timedelta(days=180))
+
+    elif filter_type == "12":
+        transactions = transactions.filter(date__gte=today - timedelta(days=365))
+
+    # 🔥 DATE RANGE FILTER (override)
+    if start_date and end_date:
+        transactions = transactions.filter(date__range=[start_date, end_date])
+
+    # 🔥 IMPORTANT (running balance sahi rakhne ke liye)
+    all_transactions = Transaction.objects.filter(party=party).order_by('date', 'id')
+
     running_balance = 0
     ledger = []
 
     total_credit = 0
     total_debit = 0
+
+    # 🔥 FIRST: full balance calculate karo (opening balance ke liye)
+    for t in all_transactions:
+        if t.type == 'credit':
+            running_balance += t.amount
+        else:
+            running_balance -= t.amount
+
+    # 🔥 SECOND: filtered ledger build karo (with running)
+    running_balance = 0  # reset for visible ledger
 
     for t in transactions:
         if t.type == 'credit':
@@ -397,15 +577,21 @@ def party_detail(request, pk):
             'balance': running_balance
         })
 
-    context = {
+    # 🔥 PAGINATION
+    paginator = Paginator(ledger, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, 'party/party_detail.html', {
         'party': party,
-        'ledger': ledger,
+        'ledger': page_obj,
         'total_credit': total_credit,
         'total_debit': total_debit,
-        'final_balance': running_balance
-    }
-
-    return render(request, 'party/party_detail.html', context)
+        'final_balance': running_balance,
+        'filter_type': filter_type,
+        'start_date': start_date,
+        'end_date': end_date,
+    })
 
 @login_required
 def print_invoice(request, pk):
@@ -662,7 +848,7 @@ def view_attendance(request):
         payment_dict[(p.employee_id, p.date.day)] = p
 
     # 🔥 summary
-    attendance_summary = defaultdict(lambda: {'present': 0, 'food': 0, 'ot': 0})
+    attendance_summary = defaultdict(lambda: {'present': 0,'absent': 0,'leave': 0,'paid_leave': 0,'weekly_off': 0,'food': 0,'ot': 0})
 
     for a in attendance:
 
@@ -671,6 +857,18 @@ def view_attendance(request):
 
         elif a.status == 'half':
             attendance_summary[a.employee_id]['present'] += 0.5
+
+        elif a.status == 'absent':
+            attendance_summary[a.employee_id]['absent'] += 1
+
+        elif a.status == 'leave':
+            attendance_summary[a.employee_id]['leave'] += 1
+
+        elif a.status == 'paid_leave':
+            attendance_summary[a.employee_id]['paid_leave'] += 1
+
+        elif a.status == 'weekly_off':
+            attendance_summary[a.employee_id]['weekly_off'] += 1
 
         if a.took_food:
             attendance_summary[a.employee_id]['food'] += 1

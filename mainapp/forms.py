@@ -18,6 +18,16 @@ class PurchaseForm(forms.ModelForm):
 
 
 class ProcessingForm(forms.ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # 🔥 already processed purchases निकालो
+        processed_ids = Processing.objects.values_list('purchase_id', flat=True)
+
+        # 🔥 सिर्फ unprocessed दिखाओ
+        self.fields['purchase'].queryset = Purchase.objects.exclude(id__in=processed_ids)
+
     class Meta:
         model = Processing
         fields = ['purchase', 'rait', 'bajri', 'bajerkut']
@@ -28,21 +38,6 @@ class ProcessingForm(forms.ModelForm):
             'bajri': forms.NumberInput(attrs={'class': 'form-control'}),
             'bajerkut': forms.NumberInput(attrs={'class': 'form-control'}),
         }
-
-    def clean(self):
-        cleaned_data = super().clean()
-
-        purchase = cleaned_data.get('purchase')
-        rait = cleaned_data.get('rait') or 0
-        bajri = cleaned_data.get('bajri') or 0
-        bajerkut = cleaned_data.get('bajerkut') or 0
-
-        total = rait + bajri + bajerkut
-
-        if purchase and total > purchase.weight:
-            raise forms.ValidationError("Total processed quantity purchase se zyada nahi ho sakti")
-
-        return cleaned_data
     
 class PartyForm(forms.ModelForm):
     class Meta:

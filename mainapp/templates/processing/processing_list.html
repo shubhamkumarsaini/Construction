@@ -4,12 +4,31 @@
 
 {% block content %}
 
-<div class="d-flex justify-content-between mb-4">
-    <h3>⚙️ Processing List</h3>
+<div class="d-flex justify-content-between align-items-center mb-3">
+
+    <h3 class="mb-0">⚙️ Processing List</h3>
+
+    <form method="GET" class="d-flex gap-2">
+
+        <!-- TEXT SEARCH -->
+        <input type="text" name="search" value="{{ search }}"
+            class="form-control"
+            placeholder="Search weight / rait..."
+            style="width:200px;">
+
+        <!-- DATE FILTER -->
+        <input type="date" name="date" value="{{ date }}"
+            class="form-control">
+
+        <button class="btn btn-primary">Search</button>
+        <a href="/processing/list/" class="btn btn-secondary">Reset</a>
+
+    </form>
 
     <a href="/processing/add/" class="btn btn-success">
         ➕ Add Processing
     </a>
+
 </div>
 
 <div class="card p-3">
@@ -23,6 +42,7 @@
                     <th>Rait</th>
                     <th>Bajri</th>
                     <th>Bajerkut</th>
+                    <th>Wastage</th>
                 </tr>
             </thead>
 
@@ -34,6 +54,7 @@
                     <td>{{ p.rait }}</td>
                     <td>{{ p.bajri }}</td>
                     <td>{{ p.bajerkut }}</td>
+                    <td>{{ p.wastage }}</td>
                 </tr>
                 {% empty %}
                 <tr>
@@ -43,6 +64,44 @@
             </tbody>
 
         </table>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mt-3">
+
+        <div>
+            Showing {{ data.start_index }} - {{ data.end_index }} of {{ data.paginator.count }}
+        </div>
+
+        <ul class="pagination mb-0">
+
+            {% if data.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ data.previous_page_number }}&search={{ search }}">
+                    Previous
+                </a>
+            </li>
+            {% endif %}
+
+            {% for i in data.paginator.page_range %}
+                {% if data.number == i %}
+                    <li class="page-item active"><span class="page-link">{{ i }}</span></li>
+                {% else %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ i }}&search={{ search }}">{{ i }}</a>
+                    </li>
+                {% endif %}
+            {% endfor %}
+
+            {% if data.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ data.next_page_number }}&search={{ search }}">
+                    Next
+                </a>
+            </li>
+            {% endif %}
+
+        </ul>
+
     </div>
 
 </div>

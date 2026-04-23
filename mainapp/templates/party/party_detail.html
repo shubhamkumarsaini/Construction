@@ -14,6 +14,26 @@
         </p>
     </div>
 
+    <form method="GET" class="d-flex gap-2 mb-3">
+
+        <!-- QUICK FILTER -->
+        <select name="filter" class="form-control" style="width:150px;">
+            <option value="">All</option>
+            <option value="1" {% if filter_type == "1" %}selected{% endif %}>1 Month</option>
+            <option value="3" {% if filter_type == "3" %}selected{% endif %}>3 Months</option>
+            <option value="6" {% if filter_type == "6" %}selected{% endif %}>6 Months</option>
+            <option value="12" {% if filter_type == "12" %}selected{% endif %}>1 Year</option>
+        </select>
+
+        <!-- DATE RANGE -->
+        <input type="date" name="start_date" value="{{ start_date }}" class="form-control">
+        <input type="date" name="end_date" value="{{ end_date }}" class="form-control">
+
+        <button class="btn btn-primary">Filter</button>
+        <a href="" class="btn btn-secondary">Reset</a>
+
+    </form>
+
     <a href="/party/list/" class="btn btn-secondary">
         <i class="fas fa-arrow-left"></i> Back
     </a>
@@ -94,6 +114,46 @@
             </tbody>
 
         </table>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mt-3">
+
+        <div>
+            Showing {{ ledger.start_index }} - {{ ledger.end_index }} of {{ ledger.paginator.count }}
+        </div>
+
+        <ul class="pagination mb-0">
+
+            {% if ledger.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ ledger.previous_page_number }}&start_date={{ start_date }}&end_date={{ end_date }}">
+                    Previous
+                </a>
+            </li>
+            {% endif %}
+
+            {% for i in ledger.paginator.page_range %}
+                {% if ledger.number == i %}
+                    <li class="page-item active"><span class="page-link">{{ i }}</span></li>
+                {% else %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ i }}&start_date={{ start_date }}&end_date={{ end_date }}">
+                            {{ i }}
+                        </a>
+                    </li>
+                {% endif %}
+            {% endfor %}
+
+            {% if ledger.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ ledger.next_page_number }}&start_date={{ start_date }}&end_date={{ end_date }}">
+                    Next
+                </a>
+            </li>
+            {% endif %}
+
+        </ul>
+
     </div>
 
 </div>

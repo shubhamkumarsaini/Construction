@@ -10,7 +10,20 @@
         <h3>🍳 Kitchen Expense</h3>
 
         <form method="GET" class="d-flex gap-2">
-            <input type="number" name="month" value="{{ month }}" class="form-control" placeholder="Month">
+            <select name="month" class="form-control">
+            <option value="1" {% if month == 1 %}selected{% endif %}>January</option>
+            <option value="2" {% if month == 2 %}selected{% endif %}>February</option>
+            <option value="3" {% if month == 3 %}selected{% endif %}>March</option>
+            <option value="4" {% if month == 4 %}selected{% endif %}>April</option>
+            <option value="5" {% if month == 5 %}selected{% endif %}>May</option>
+            <option value="6" {% if month == 6 %}selected{% endif %}>June</option>
+            <option value="7" {% if month == 7 %}selected{% endif %}>July</option>
+            <option value="8" {% if month == 8 %}selected{% endif %}>August</option>
+            <option value="9" {% if month == 9 %}selected{% endif %}>September</option>
+            <option value="10" {% if month == 10 %}selected{% endif %}>October</option>
+            <option value="11" {% if month == 11 %}selected{% endif %}>November</option>
+            <option value="12" {% if month == 12 %}selected{% endif %}>December</option>
+        </select>
             <input type="number" name="year" value="{{ year }}" class="form-control" placeholder="Year">
             <button class="btn btn-primary">Filter</button>
         </form>

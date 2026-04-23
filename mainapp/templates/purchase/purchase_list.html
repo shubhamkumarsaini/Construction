@@ -3,10 +3,40 @@
 {% block title %}Purchase List{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    
+<div class="d-flex justify-content-between align-items-center mb-3">
+
+    <!-- LEFT -->
     <h3 class="mb-0">📋 Purchase List</h3>
 
+    <!-- CENTER (FORM) -->
+    <form method="GET" class="d-flex flex-column gap-1">
+
+        <!-- 🔥 ROW 1 -->
+        <div class="d-flex gap-2">
+            <select name="filter" class="form-control" style="width:130px;">
+                <option value="">All</option>
+                <option value="1" {% if filter_type == "1" %}selected{% endif %}>1M</option>
+                <option value="3" {% if filter_type == "3" %}selected{% endif %}>3M</option>
+                <option value="6" {% if filter_type == "6" %}selected{% endif %}>6M</option>
+                <option value="12" {% if filter_type == "12" %}selected{% endif %}>1Y</option>
+            </select>
+            <input type="text" name="search" value="{{ search }}"
+                   class="form-control"
+                   placeholder="Search supplier / vehicle">
+        </div>
+
+        <!-- 🔥 ROW 2 -->
+        <div class="d-flex gap-2">
+            <input type="date" name="start_date" value="{{ start_date }}" class="form-control" style="width:150px;">
+            <input type="date" name="end_date" value="{{ end_date }}" class="form-control" style="width:150px;">
+
+            <button class="btn btn-primary btn-sm">Search</button>
+            <a href="/purchase_list/" class="btn btn-secondary btn-sm">Reset</a>
+        </div>
+
+    </form>
+
+    <!-- RIGHT -->
     <a href="/add_purchase/" class="btn btn-success">
         ➕ Add Purchase
     </a>
@@ -19,6 +49,7 @@
             
             <thead class="table-dark">
                 <tr>
+                    <th>Id</th>
                     <th>Date</th>
                     <th>Supplier</th>
                     <th>Vehicle</th>
@@ -31,6 +62,7 @@
             <tbody>
                 {% for p in purchases %}
                 <tr>
+                    <td>{{ p.id }}</td>
                     <td>{{ p.date }}</td>
                     <td>{{ p.supplier_name }}</td>
                     <td>{{ p.vehicle_number }}</td>
@@ -48,6 +80,46 @@
             </tbody>
 
         </table>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mt-3">
+
+        <div>
+            Showing {{ purchases.start_index }} - {{ purchases.end_index }} of {{ purchases.paginator.count }}
+        </div>
+
+        <ul class="pagination mb-0">
+
+            {% if purchases.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ purchases.previous_page_number }}&search={{ search }}&filter={{ filter_type }}&start_date={{ start_date }}&end_date={{ end_date }}">
+                    Previous
+                </a>
+            </li>
+            {% endif %}
+
+            {% for i in purchases.paginator.page_range %}
+                {% if purchases.number == i %}
+                    <li class="page-item active"><span class="page-link">{{ i }}</span></li>
+                {% else %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ i }}&search={{ search }}&filter={{ filter_type }}&start_date={{ start_date }}&end_date={{ end_date }}">
+                            {{ i }}
+                        </a>
+                    </li>
+                {% endif %}
+            {% endfor %}
+
+            {% if purchases.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ purchases.next_page_number }}&search={{ search }}&filter={{ filter_type }}&start_date={{ start_date }}&end_date={{ end_date }}">
+                    Next
+                </a>
+            </li>
+            {% endif %}
+
+        </ul>
+
     </div>
 
 </div>
