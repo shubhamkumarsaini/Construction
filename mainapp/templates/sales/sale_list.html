@@ -5,9 +5,21 @@
 {% block content %}
 
 <!-- 🔥 Header -->
-<div class="d-flex justify-content-between align-items-center mb-4">
-    
+<div class="d-flex justify-content-between align-items-center mb-3">
+
     <h3 class="mb-0">💰 Sales List</h3>
+
+    <form method="GET" class="d-flex gap-2">
+
+        <input type="text" name="search" value="{{ search }}"
+               class="form-control"
+               placeholder="Search party / product"
+               style="width:220px;">
+
+        <button class="btn btn-primary">Search</button>
+        <a href="/sales/list/" class="btn btn-secondary">Reset</a>
+
+    </form>
 
     <a href="/sales/add/" class="btn btn-success">
         ➕ Add Sale
@@ -89,6 +101,48 @@
             </tbody>
 
         </table>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mt-3">
+
+        <div>
+            Showing {{ sales.start_index }} - {{ sales.end_index }} of {{ sales.paginator.count }}
+        </div>
+
+        <ul class="pagination mb-0">
+
+            {% if sales.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ sales.previous_page_number }}&search={{ search }}">
+                    Previous
+                </a>
+            </li>
+            {% endif %}
+
+            {% for i in sales.paginator.page_range %}
+                {% if sales.number == i %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ i }}</span>
+                    </li>
+                {% else %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ i }}&search={{ search }}">
+                            {{ i }}
+                        </a>
+                    </li>
+                {% endif %}
+            {% endfor %}
+
+            {% if sales.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ sales.next_page_number }}&search={{ search }}">
+                    Next
+                </a>
+            </li>
+            {% endif %}
+
+        </ul>
+
     </div>
 
 </div>

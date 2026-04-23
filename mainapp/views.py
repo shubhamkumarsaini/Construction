@@ -508,9 +508,29 @@ def add_sale(request):
 
     return render(request, 'sales/add_sale.html', {'form': form})
 
+@login_required
 def sale_list(request):
-    sales = Sale.objects.all().order_by('-id')
-    return render(request, 'sales/sale_list.html', {'sales': sales})
+
+    search = request.GET.get('search')
+
+    sales = Sale.objects.select_related('party').order_by('-date')
+
+    # 🔍 SEARCH (party + product)
+    if search and search != "None":
+        sales = sales.filter(
+            Q(party__name__icontains=search) |
+            Q(product__icontains=search)
+        )
+
+    # 🔥 PAGINATION
+    paginator = Paginator(sales, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, 'sales/sale_list.html', {
+        'sales': page_obj,
+        'search': search if search and search != "None" else "",
+    })
 
 @login_required
 def party_detail(request, pk):
