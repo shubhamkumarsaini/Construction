@@ -106,6 +106,7 @@ thead th:first-child {
                         <!-- Employee -->
                         <td class="text-start fw-bold">
                             {{ emp.name }}
+                            <small class="text-muted">({{ emp.employee_type }})</small>
                         </td>
 
                         <!-- Days -->
@@ -117,17 +118,22 @@ thead th:first-child {
 
                                 {% if att %}
                                     
+
                                     {% if att.status == 'present' %}
                                         <span class="badge bg-success">P</span>
 
                                     {% elif att.status == 'absent' %}
                                         <span class="badge bg-danger">A</span>
 
+                                    {% elif att.status == 'leave' %}
+                                        <span class="badge bg-secondary">L</span>
+
                                     {% elif att.status == 'paid_leave' %}
                                         <span class="badge bg-warning text-dark">PL</span>
 
                                     {% else %}
                                         <span class="badge bg-info text-dark">WO</span>
+
                                     {% endif %}
 
                                     <br>
